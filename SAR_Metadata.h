@@ -12,6 +12,7 @@
 #include <string>
 #include <stdexcept>
 #include <vector>
+#include <cstdlib>
 
 using namespace std;
 
