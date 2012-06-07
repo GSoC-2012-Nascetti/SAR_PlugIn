@@ -20,9 +20,19 @@ double DATEtoDOY(std::string date)
 		pos = date.find("T");
 		date = date.substr(pos);
 		Time = atof(date.substr(1,2).c_str())*3600+atof(date.substr(4,2).c_str())*60
-								 +atof(date.substr(7).c_str());
+								 +atof(date.substr(7,9).c_str());
 		DOY = 367.0*Year-int(7.0*(Year+int((Month+9.0)/12.0))/4.0)+
               int(275.0*(Month)/9.0)+(Day)-730531.5+(Time/3600.0)/24.0;
 
 		return DOY;
+}
+
+SAR_Metadata::SAR_Metadata(void)
+{
+	CornerCoordinate.reserve(10);
+	StateVectors.reserve(20);
+}
+
+SAR_Metadata::~SAR_Metadata(void)
+{
 }
