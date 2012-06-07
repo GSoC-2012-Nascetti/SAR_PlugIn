@@ -18,7 +18,6 @@
 #include "DynamicObject.h"
 #include "FileDescriptor.h"
 #include "Filename.h"
-#include <limits>
 #include "MessageLogResource.h"
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
@@ -26,46 +25,38 @@
 #include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "Progress.h"
-#include "RADARSAT_Metadata.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "stdlib.h"
 #include <stdio.h>
 #include "StringUtilities.h"
 #include "switchOnEncoding.h"
-#include "TestSAR.h"
+#include "Test_Update_TerraSAR.h"
 #include "TerraSAR_Metadata.h"
 #include "UtilityServices.h"
-#include "XercesIncludes.h"
-#include "xmlbase.h"
-#include "xmlreader.h" 
-#include "xmlreaderSar.h" 
-#include "xmlwriter.h"
 
-XERCES_CPP_NAMESPACE_USE
+REGISTER_PLUGIN_BASIC(OpticksSAR, Test_Update_TerraSAR);
 
-REGISTER_PLUGIN_BASIC(OpticksSAR, TestSAR);
-
-TestSAR::TestSAR(void)
+Test_Update_TerraSAR::Test_Update_TerraSAR(void)
 {
-   setDescriptorId("{30A7E348-ABCC-11E1-84E7-E7C06188709B}");
-   setName("TestSAR");
-   setDescription("Accessing SAR Metadata");
+   setDescriptorId("{501590E6-AFEF-11E1-A4F3-393D6288709B}");
+   setName("Test_Update_TerraSAR");
+   setDescription("Accessing TerraSAR Metadata");
    setCreator("Opticks Community");
    setVersion("Sample");
    setCopyright("Copyright(c) 2012, Andrea Nascetti <andreanascetti@gmail.com>");
    setProductionStatus(false);
    setType("Sample");
    setSubtype("Statistics");
-   setMenuLocation("[SAR PlugIn]/Test SAR");
+   setMenuLocation("[SAR PlugIn]/Test Update TerraSAR Metadata");
    setAbortSupported(true);
 }
 
-TestSAR::~TestSAR(void)
+Test_Update_TerraSAR::~Test_Update_TerraSAR(void)
 {
 }
 
-bool TestSAR::getInputSpecification(PlugInArgList* &pInArgList)
+bool Test_Update_TerraSAR::getInputSpecification(PlugInArgList* &pInArgList)
 {
    pInArgList = Service<PlugInManagerServices>()->getPlugInArgList();
    VERIFY(pInArgList != NULL);
@@ -74,7 +65,7 @@ bool TestSAR::getInputSpecification(PlugInArgList* &pInArgList)
    return true;
 }
 
-bool TestSAR::getOutputSpecification(PlugInArgList*& pOutArgList)
+bool Test_Update_TerraSAR::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
    pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList();
    VERIFY(pOutArgList != NULL);
@@ -83,12 +74,11 @@ bool TestSAR::getOutputSpecification(PlugInArgList*& pOutArgList)
    return true;
 }
 
-bool TestSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
+bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
- 
   StepResource pStep("Tutorial CEO", "app", "0FD3C564-041D-4f8f-BBF8-96A7A165AB61");
 
-  if (pInArgList == NULL || pOutArgList == NULL)
+   if (pInArgList == NULL || pOutArgList == NULL)
    {
       return false;
    }
@@ -112,58 +102,7 @@ bool TestSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    FactoryResource<DataRequest> pRequest;
    DataAccessor pAcc = pCube->getDataAccessor(pRequest.release());
 
-   double min = std::numeric_limits<double>::max();
-   double max = -min;
-   
-   double total = 0.0; 
-
-   for (unsigned int row = 0; row < pDesc->getRowCount(); ++row)
-   {
-      if (isAborted())
-      {
-         std::string msg = getName() + " has been aborted.";
-         pStep->finalize(Message::Abort, msg);
-         if (pProgress != NULL)
-         {
-            pProgress->updateProgress(msg, 0, ABORT);
-         }
-
-         return false;
-      }
-      if (!pAcc.isValid())
-      {
-         std::string msg = "Unable to access the cube data.";
-         pStep->finalize(Message::Failure, msg);
-         if (pProgress != NULL)
-         {
-            pProgress->updateProgress(msg, 0, ERRORS);
-         }
-
-         return false;
-      }
-
-      if (pProgress != NULL)
-      {
-         pProgress->updateProgress("Calculating statistics", row * 100 / pDesc->getRowCount(), NORMAL);
-      }
-
-      for (unsigned int col = 0; col < pDesc->getColumnCount(); ++col)
-      {		 
-		 total+= Service<ModelServices>()->getDataValue(pDesc->getDataType(), pAcc->getColumn(), COMPLEX_MAGNITUDE, 0);
-
-		 pAcc->nextColumn();
-      }
-      pAcc->nextRow();
-   }
-
    std::string path = pCube->getFilename();
-
-   unsigned int count = pDesc->getColumnCount() * pDesc->getRowCount();
-   double mean = total / count;
-
-   std::vector<std::string> Info, MetaInfo;
-
-   Info = pCube->getPropertiesPages();
 
    DataDescriptor* dMeta = pCube->getDataDescriptor();
 
@@ -173,18 +112,23 @@ bool TestSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 		   
 	TerraSAR_Metadata Prova_metadata;
 
-	Prova_metadata.ReadFile(path);
+	bool control = Prova_metadata.ReadFile(path);
+
+	if (control == false)
+	{
+	std::string msg = "This is not a TerraSAR-X SLC Files, Metadata can't be updated";
+	pProgress->updateProgress(msg, 100, ERRORS);
+	return false;
+	}
 
 	Prova_metadata.UpdateMetadata(Metadata); 
-     
+
 	//   ************************************************************************************ //
 
-   
 	if (pProgress != NULL)
 	{
 		std::string msg = "Number of Rows : " + StringUtilities::toDisplayString(pDesc->getRowCount()) + "\n"
 						  "Number of Columns : " + StringUtilities::toDisplayString(pDesc->getColumnCount()) + "\n\n"
-						  "Complex mean value : " + StringUtilities::toDisplayString(mean) + "\n\n"
 						  "XML file path : " + StringUtilities::toDisplayString(path) + "\n\n"
 						  "Metadata update completed: " + "\n";
 				  						                      
