@@ -14,6 +14,8 @@
 #include "XercesIncludes.h"
 #include "xmlreader.h" 
 
+#include "xmlreaderSAR.h" 
+
 XERCES_CPP_NAMESPACE_USE
 
 TerraSAR_Metadata::TerraSAR_Metadata(void)
@@ -28,7 +30,7 @@ TerraSAR_Metadata::~TerraSAR_Metadata(void)
 
 bool TerraSAR_Metadata::ReadFile(std::string path)
 {	
-   XmlReader xml(Service<MessageLogMgr>()->getLog(), false);
+   XmlReaderSAR xml(Service<MessageLogMgr>()->getLog(), false);
    
    if (path.empty() || xml.parse(path) == NULL)
    {

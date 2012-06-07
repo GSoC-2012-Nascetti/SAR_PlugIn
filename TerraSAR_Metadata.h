@@ -1,3 +1,12 @@
+/*
+* The information in this file is
+* Copyright(c) 2012, Andrea Nascetti <andreanascetti@gmail.com>
+* and is subject to the terms and conditions of the
+* GNU Lesser General Public License Version 2.1
+* The license text is available from
+* http://www.gnu.org/licenses/lgpl.html
+*/
+
 #pragma once
 
 #include "DynamicObject.h"
@@ -9,7 +18,7 @@
 
 using namespace std;
 
-class TerraSAR_Metadata
+class TerraSAR_Metadata : public SAR_Metadata
 {
 public:
 	//Constructor & Destructor
@@ -19,31 +28,6 @@ public:
 	//Methods//
 	bool ReadFile(std::string);
 	void UpdateMetadata(DynamicObject*);
-
-	// ACQUISITION INFO //
-	std::string SatelliteName;
-	std::string Projection;
-	std::string Orbit;
-	std::string SideLooking;
-	std::string ProductType;
-
-	// RASTER DATA //
-	int     Height, Width;
-	double  ColumnSpacing;
-	double  RowSpacing;
-	double  RangeD0;
-	double  RangeDi;
-	double  PRF; //Pulse Repetition Frequency //
-	double  AzimutT0; // First pixel azimuth time //
-	double  AzimutTi; // 1/PRF //
-
-	// COORDINATE SCENE //
-	double SceneHeight;
-	std::vector<COORD> CornerCoordinate;
-
-	// STATE VECTORS INFORMATION //
-	int NumStateVectors;
-	std::vector<STATEVECTOR> StateVectors;
 
 	// ANNOTATION CORRECTION //
 	double RangeCoeff1,RangeCoeff2,AzimuthCoeff;
