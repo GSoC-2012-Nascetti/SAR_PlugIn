@@ -10,7 +10,7 @@
 #ifndef Test_Update_TerraSAR_H
 #define Test_Update_TerraSAR_H
 
-#include "executableshell.h"
+#include "ExecutableShell.h"
 
 class Test_Update_TerraSAR : public ExecutableShell
 {

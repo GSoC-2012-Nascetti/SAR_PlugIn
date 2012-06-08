@@ -1,4 +1,4 @@
-/*
+ /*
  * The information in this file is
  * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
@@ -10,7 +10,7 @@
 #ifndef Test_Update_RADARSAT2_H
 #define Test_Update_RADARSAT2_H
 
-#include "executableshell.h"
+#include "ExecutableShell.h"
 
 class Test_Update_RADARSAT2 : public ExecutableShell
 {
