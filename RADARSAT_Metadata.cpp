@@ -110,7 +110,8 @@ bool RADARSAT_Metadata::ReadFile(std::string path)
 	Date = XMLString::transcode(pResult->getStringValue());	
 	AzimutTi = DATEtoDOY(Date);
 	PRF = AzimutTi;
-	AzimutTi = 86400*(AzimutTi-AzimutT0)/double(Height);
+	//AzimutTi = 86400*(AzimutTi-AzimutT0)/double(Height);
+	AzimutTi = (AzimutTi-AzimutT0)/double(Height);
 	
 	RangeDi = ColumnSpacing;
 
@@ -184,6 +185,7 @@ bool RADARSAT_Metadata::ReadFile(std::string path)
 	// RETRIVE ORBIT STATE VECTORS //
 
 	NumStateVectors = 5;
+	StateVectors.resize(NumStateVectors);
 	
 		for (int n=1; n<=NumStateVectors; n++ )
 	{
@@ -256,15 +258,15 @@ void RADARSAT_Metadata::UpdateMetadata(DynamicObject* DynamicMetadata)
 	{
 		std::stringstream num;
 		num<<n;
-		current = "SAR METADATA/CORNER COORDIATE/Corner "+num.str()+"/Lat";
+		current = "SAR METADATA/CORNER COORDINATE/Corner "+num.str()+"/Lat";
 		DynamicMetadata->setAttributeByPath(current,CornerCoordinate[n].Latitude);
-		current = "SAR METADATA/CORNER COORDIATE/Corner "+num.str()+"/Lon";
+		current = "SAR METADATA/CORNER COORDINATE/Corner "+num.str()+"/Lon";
 		DynamicMetadata->setAttributeByPath(current,CornerCoordinate[n].Longitude);
-		current = "SAR METADATA/CORNER COORDIATE/Corner "+num.str()+"/Height";
+		current = "SAR METADATA/CORNER COORDINATE/Corner "+num.str()+"/Height";
 		DynamicMetadata->setAttributeByPath(current,CornerCoordinate[n].Height);
-		current = "SAR METADATA/CORNER COORDIATE/Corner "+num.str()+"/RefColumn";
+		current = "SAR METADATA/CORNER COORDINATE/Corner "+num.str()+"/RefColumn";
 		DynamicMetadata->setAttributeByPath(current,CornerCoordinate[n].I);
-		current = "SAR METADATA/CORNER COORDIATE/Corner "+num.str()+"/RefRow";
+		current = "SAR METADATA/CORNER COORDINATE/Corner "+num.str()+"/RefRow";
 		DynamicMetadata->setAttributeByPath(current,CornerCoordinate[n].J);
 	}
 
