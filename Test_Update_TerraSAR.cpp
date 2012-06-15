@@ -27,6 +27,7 @@
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
+#include "SAR_Model.h"
 #include "stdlib.h"
 #include <stdio.h>
 #include "StringUtilities.h"
@@ -34,6 +35,21 @@
 #include "Test_Update_TerraSAR.h"
 #include "TerraSAR_Metadata.h"
 #include "UtilityServices.h"
+
+#include "DesktopServices.h"
+#include "GcpList.h"
+#include "GcpLayer.h"
+#include "TypeConverter.h"
+#include <QtCore/QStringList>
+#include <QtGui/QInputDialog>
+#include "SAR_Model.h"
+
+#include "boost\accumulators\accumulators.hpp"
+#include "boost\accumulators\statistics\stats.hpp"
+#include "boost\accumulators\statistics\mean.hpp"
+#include "boost\accumulators\statistics\variance.hpp"
+
+using namespace boost::accumulators;
 
 REGISTER_PLUGIN_BASIC(OpticksSAR, Test_Update_TerraSAR);
 
@@ -62,6 +78,12 @@ bool Test_Update_TerraSAR::getInputSpecification(PlugInArgList* &pInArgList)
    VERIFY(pInArgList != NULL);
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
    pInArgList->addArg<RasterElement>(Executable::DataElementArg(), "Update SAR Metadaa for this raster element");
+
+   if (isBatch())
+   {
+      pInArgList->addArg<GcpList>("GcpList", NULL, "The GCP List to calculate statistics over");
+   }
+
    return true;
 }
 
@@ -123,14 +145,118 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 
 	Prova_metadata.UpdateMetadata(Metadata); 
 
-	//   ************************************************************************************ //
+	// WIDGET SELECT & RETRIEVE GCPs INFORMATION  //
+	GcpList * GCPs = NULL;
 
+    Service<ModelServices> pModel;
+	std::vector<DataElement*> pGcpLists = pModel->getElements(pCube, TypeConverter::toString<GcpList>());
+
+    if (!pGcpLists.empty())
+	{
+         QStringList aoiNames("<none>");
+         for (std::vector<DataElement*>::iterator it = pGcpLists.begin(); it != pGcpLists.end(); ++it)
+         {
+            aoiNames << QString::fromStdString((*it)->getName());
+         }
+         QString aoi = QInputDialog::getItem(Service<DesktopServices>()->getMainWidget(),
+            "Select a GCP List", "Select a GCP List for validate the orientation model", aoiNames);
+         
+         if (aoi != "<none>")
+         {
+            std::string strAoi = aoi.toStdString();
+            for (std::vector<DataElement*>::iterator it = pGcpLists.begin(); it != pGcpLists.end(); ++it)
+            {
+               if ((*it)->getName() == strAoi)
+               {
+                  GCPs = static_cast<GcpList*>(*it);
+                  break;
+               }
+            }
+            if (GCPs == NULL)
+            {
+               std::string msg = "Invalid GCPList.";
+               pStep->finalize(Message::Failure, msg);
+               if (pProgress != NULL)
+               {
+                  pProgress->updateProgress(msg, 0, ERRORS);
+               }
+
+               return false;
+            }
+         }
+	} // End if GcpList
+   
+	
+	// UPDATE GCPs HEIGHT INFORMATION AND SWITCH Lat&Lon COORDINATE FOR CORRECT VISUALIZAZION IN THE GCPs EDITOR
+
+    std::list<GcpPoint> Punti = GCPs->getSelectedPoints();
+     
+	Punti = Prova_metadata.UpdateGCP(Punti, path);
+
+	SAR_Model ModProva(Prova_metadata);
+
+	COORD Punto;
+	int N=Punti.size();
+	int n=0;
+	double Lat, Lon;
+
+	accumulator_set<double, stats<tag::mean, tag::variance> > accX, accY;
+
+	list<GcpPoint>::iterator pList;
+	for (pList = Punti.begin(); pList != Punti.end(); pList++)
+	{
+		if(pList->mPixel.mX<Prova_metadata.Width && pList->mPixel.mY<Prova_metadata.Height)	
+		{
+			Lon = pList->mCoordinate.mX;
+			Lat = pList->mCoordinate.mY;
+			
+			Punto = ModProva.SAR_GroundToSlant(pList->mCoordinate.mX,pList->mCoordinate.mY,pList->mCoordinate.mZ);
+			pList->mRmsError.mX = pList->mPixel.mX -Punto.I;
+			pList->mRmsError.mY = pList->mPixel.mY -Punto.J;
+			accX(pList->mRmsError.mX);
+			accY(pList->mRmsError.mY);
+
+			pList->mCoordinate.mX = Lat;
+			pList->mCoordinate.mY = Lon;
+
+		}
+		else
+		{
+			Lon = pList->mCoordinate.mX;
+			Lat = pList->mCoordinate.mY;
+			pList->mRmsError.mX = -9999;
+			pList->mRmsError.mY = -9999;
+			pList->mCoordinate.mX = Lat;
+			pList->mCoordinate.mY = Lon;
+		}
+
+		      if (pProgress != NULL)
+		{
+         pProgress->updateProgress("Calculating statistics", n/N, NORMAL);
+		}
+		n++;
+	}
+
+	 double meanX = mean(accX);
+	 double meanY = mean(accY);
+
+	 double varX = variance(accX);
+	 double varY = variance(accY);
+	
+     GCPs->clearPoints();
+     GCPs->addPoints(Punti);
+	
 	if (pProgress != NULL)
 	{
 		std::string msg = "Number of Rows : " + StringUtilities::toDisplayString(pDesc->getRowCount()) + "\n"
 						  "Number of Columns : " + StringUtilities::toDisplayString(pDesc->getColumnCount()) + "\n\n"
-						  "XML file path : " + StringUtilities::toDisplayString(path) + "\n\n"
-						  "Metadata update completed: " + "\n";
+						  "Metadata update completed" + "\n\n"					  
+						  "**********     Validation Results     **********" "\n\n"
+						  "Number of GCPs: " + StringUtilities::toDisplayString(Punti.size()) + "\n\n"
+						  "Mean I : " + StringUtilities::toDisplayString(meanX) + "\n"
+						  "Variance I : " + StringUtilities::toDisplayString(varX) + "\n\n"
+						  "Mean J : " + StringUtilities::toDisplayString(meanY) + "\n"
+						  "Variance J : " + StringUtilities::toDisplayString(varY) + "\n\n" ;
 				  						                      
 		pProgress->updateProgress(msg, 100, NORMAL);
 	}
