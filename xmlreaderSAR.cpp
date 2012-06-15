@@ -12,7 +12,7 @@
 #include "StringUtilities.h"
 #include "UtilityServices.h"
 #include "xmlreader.h"
-#include "XmlReaderSAR.h"
+#include "xmlreaderSAR.h"
 
 #include <sstream>
 #include <stdio.h>
