@@ -70,6 +70,6 @@ public:
 
 	// STATE VECTORS INFORMATION //
 	int NumStateVectors;
-	std::vector<STATEVECTOR> StateVectors;
+	std::vector<STATEVECTOR> StateVectors; //controllare static?????
 
 };
