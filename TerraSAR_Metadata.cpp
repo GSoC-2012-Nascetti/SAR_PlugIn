@@ -100,6 +100,8 @@ bool TerraSAR_Metadata::ReadFile(std::string path)
 	AzimutT0 = DATEtoDOY(Date);
 
 	// RETRIEVE CORNER COORDINATE //
+	CornerCoordinate.resize(5);
+
 	pResult = xml.query("xs:integer(//productInfo/sceneInfo/sceneCenterCoord/refRow/text())", 
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[0].J = pResult->getIntegerValue();
@@ -152,8 +154,10 @@ bool TerraSAR_Metadata::ReadFile(std::string path)
 	pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	VERIFY(pResult != NULL);
 	NumStateVectors = pResult->getIntegerValue();
+
+	StateVectors.resize(NumStateVectors);
 	
-		for (int n=1; n<=NumStateVectors; n++ )
+	for (int n=1; n<=NumStateVectors; n++ )
 	{
 		std::stringstream num;
 		num<<n;
@@ -298,4 +302,45 @@ void TerraSAR_Metadata::UpdateMetadata(DynamicObject* DynamicMetadata)
 	DynamicMetadata->setAttributeByPath("SAR METADATA/ANNOTATION CORRECTION /Range/Iono_Corr",RangeCoeff2);
 	DynamicMetadata->setAttributeByPath("SAR METADATA/ANNOTATION CORRECTION /Azimuth/Shift_Corr",AzimuthCoeff);
 
+}
+
+std::list<GcpPoint> TerraSAR_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path)
+{
+	int N=0;
+	N = PuntiGCPs.size();
+	size_t pos;
+	std::string path2;
+	pos = path.find_last_of("/");
+	path2 = path.substr(0,pos);
+	path2 += "/ANNOTATION/GEOREF.xml";
+
+	XmlReaderSAR xml(Service<MessageLogMgr>()->getLog(), false);
+	
+	if (path2.empty() || xml.parse(path2) == NULL)
+	{
+      return PuntiGCPs;
+	}
+
+	list<GcpPoint>::iterator pList;	
+
+	std::string current;
+	XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* pResult;
+
+	int n=1;
+
+	for (pList = PuntiGCPs.begin(); pList != PuntiGCPs.end(); pList++)
+	{
+		std::stringstream num;
+		num<<n;
+		current = "xs:double(//geolocationGrid/gridPoint["+num.str()+"]/height/text())";
+		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		//VERIFY(pResult != NULL);
+		pList->mCoordinate.mZ = static_cast<double>(pResult->getNumberValue());	
+		//pList->mPixel.mX = pList->mPixel.mX-1;
+		//pList->mPixel.mY = pList->mPixel.mY-1;
+		n++;
+
+	}
+
+	return PuntiGCPs;
 }
