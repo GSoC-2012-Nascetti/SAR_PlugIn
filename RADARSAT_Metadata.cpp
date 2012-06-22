@@ -110,8 +110,15 @@ bool RADARSAT_Metadata::ReadFile(std::string path)
 	Date = XMLString::transcode(pResult->getStringValue());	
 	AzimutTi = DATEtoDOY(Date);
 	PRF = AzimutTi;
-	//AzimutTi = 86400*(AzimutTi-AzimutT0)/double(Height);
-	AzimutTi = (AzimutTi-AzimutT0)/double(Height);
+	//AzimutTi = 86400*(AzimutTi-AzimutT0)/double(Height); //DOY
+	AzimutTi = (AzimutTi-AzimutT0)/double(Height-1);
+
+    if (AzimutTi <0.0) //Prova per RADARSAT-2
+		{
+			AzimutT0 = AzimutT0+AzimutTi*(Height-1);
+			AzimutTi = -AzimutTi;
+		
+		}
 	
 	RangeDi = ColumnSpacing;
 
@@ -292,4 +299,43 @@ void RADARSAT_Metadata::UpdateMetadata(DynamicObject* DynamicMetadata)
 		DynamicMetadata->setAttributeByPath(current,StateVectors[n-1].DOY);
 	}
 
+}
+
+std::list<GcpPoint> RADARSAT_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path)
+{
+	int N=0;
+	N = PuntiGCPs.size();
+
+	std::string DefaultNamespace = "http://www.rsi.ca/rs2/prod/xml/schemas";
+
+	XmlReaderSAR xml(Service<MessageLogMgr>()->getLog(), false);
+	
+	if (path.empty() || xml.parse(path) == NULL)
+	{
+      return PuntiGCPs;
+	}
+
+	list<GcpPoint>::iterator pList;	
+
+	std::string current;
+	XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* pResult;
+
+	int n=1;
+
+	for (pList = PuntiGCPs.begin(); pList != PuntiGCPs.end(); pList++)
+	{
+		std::stringstream num;
+		num<<n;              
+		current = "xs:double(//geolocationGrid/imageTiePoint["+num.str()+"]/geodeticCoordinate/height/text())";
+		pResult = xml.queryNamespace(current,DefaultNamespace, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		pList->mCoordinate.mZ = static_cast<double>(pResult->getNumberValue());	
+	    
+		current = "xs:double(//geolocationGrid/imageTiePoint["+num.str()+"]/imageCoordinate/line/text())";
+		pResult = xml.queryNamespace(current,DefaultNamespace, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		pList->mPixel.mY = static_cast<double>(pResult->getNumberValue());
+		n++;
+
+	}
+
+	return PuntiGCPs;
 }
