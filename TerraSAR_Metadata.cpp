@@ -8,6 +8,7 @@
 */
 
 #include "AppVerify.h"
+#include "Progress.h"
 #include "stdlib.h"
 #include "sstream"
 #include "TerraSAR_Metadata.h"
@@ -226,7 +227,7 @@ bool TerraSAR_Metadata::ReadFile(std::string path)
 		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 		VERIFY(pResult != NULL);
 	AzimuthCoeff = static_cast<double>(pResult->getNumberValue());
-	AzimutT0 = AzimutT0 + AzimuthCoeff/86400;
+	AzimutT0 = AzimutT0 - AzimuthCoeff;  //86400;
 	AzimutTi = 1/PRF;
 
 	return true;
@@ -304,7 +305,7 @@ void TerraSAR_Metadata::UpdateMetadata(DynamicObject* DynamicMetadata)
 
 }
 
-std::list<GcpPoint> TerraSAR_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path)
+std::list<GcpPoint> TerraSAR_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path, Progress *pProgress)
 {
 	int N=0;
 	N = PuntiGCPs.size();
@@ -328,17 +329,31 @@ std::list<GcpPoint> TerraSAR_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, 
 
 	int n=1;
 
+	/* current = "fn:tokenize(//geolocationGrid/gridPoint/lon/text(), '\\s+')";
+	pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::ITERATOR_RESULT_TYPE);
+	pList->mCoordinate.mZ = static_cast<double>(pResult->getNumberValue());	
+
+	pResult->iterateNext();
+	pList->mCoordinate.mZ = static_cast<double>(pResult->getNumberValue()); */
+	
+	
 	for (pList = PuntiGCPs.begin(); pList != PuntiGCPs.end(); pList++)
 	{
 		std::stringstream num;
 		num<<n;
+		current = "xs:double(//geolocationGrid/gridPoint["+num.str()+"]/lon/text())";
+		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		pList->mCoordinate.mX = static_cast<double>(pResult->getNumberValue());	
+		current = "xs:double(//geolocationGrid/gridPoint["+num.str()+"]/lat/text())";
+		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		pList->mCoordinate.mY = static_cast<double>(pResult->getNumberValue());	
+
 		current = "xs:double(//geolocationGrid/gridPoint["+num.str()+"]/height/text())";
 		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-		//VERIFY(pResult != NULL);
 		pList->mCoordinate.mZ = static_cast<double>(pResult->getNumberValue());	
-		//pList->mPixel.mX = pList->mPixel.mX-1;
-		//pList->mPixel.mY = pList->mPixel.mY-1;
+
 		n++;
+		pProgress->updateProgress("Update GCPs Information",int(100*n/N), NORMAL);
 
 	}
 

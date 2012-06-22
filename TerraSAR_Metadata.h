@@ -28,7 +28,7 @@ public:
 	//Methods//
 	bool ReadFile(std::string);
 	void UpdateMetadata(DynamicObject*);
-	std::list<GcpPoint> UpdateGCP(std::list<GcpPoint>, std::string);
+	std::list<GcpPoint> UpdateGCP(std::list<GcpPoint>, std::string, Progress *pProgress);
 
 	// ANNOTATION CORRECTION //
 	double RangeCoeff1,RangeCoeff2,AzimuthCoeff;
