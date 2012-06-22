@@ -135,7 +135,7 @@ SAR_Model::SAR_Model(SAR_Metadata &InputMetadata)
 	
 	// Computation of satellite position&velocity for each rows using Lagrange interpolator //  
 	for (int i=0; i<100*Metadata.Height; i++) 
-	{	
+	{		
 		Time = Metadata.AzimutT0 + (Metadata.AzimutTi/100.0)*i;
 		StateVectorsRows[i] = LagrangeInterpolation(Time,Metadata.StateVectors,OrbitCoeff);
 	}
@@ -217,13 +217,28 @@ COORD SAR_Model::SAR_GroundToSlant(double Lon,double Lat, double H)
 			Index[1]=Index[0] +int(((Index[2]-Index[0])/2.0));			
 		}
     }
-	
-	
+		
 	Pos_Module = sqrt(pow((StateVectorsRows[Index[1]].X-Point.X_Ecef),2.0) +pow((StateVectorsRows[Index[1]].Y-Point.Y_Ecef),2.0) +pow((StateVectorsRows[Index[1]].Z-Point.Z_Ecef),2.0));
+		
+	if (Metadata.SatelliteName == "RADARSAT-2")
+	{
+		if (Metadata.Orbit == "Ascending" && Metadata.SideLooking =="Right") 
+		{
+			Point.I = (Pos_Module-Metadata.RangeD0)/Metadata.RangeDi; 
+			Point.J = (Metadata.Height-1)- ((StateVectorsRows[Index[1]].DOY-Metadata.AzimutT0)/Metadata.AzimutTi);
+		}
+		if (Metadata.Orbit == "Descending" && Metadata.SideLooking =="Right")
+		{
+			Point.I = (Metadata.Width-1)-(Pos_Module-Metadata.RangeD0)/Metadata.RangeDi; 
+		    Point.J = (StateVectorsRows[Index[1]].DOY-Metadata.AzimutT0)/Metadata.AzimutTi;
+		}			
+	}
+	else
+	{
+		Point.I = (Pos_Module-Metadata.RangeD0)/Metadata.RangeDi ; 	
+		Point.J = (StateVectorsRows[Index[1]].DOY-Metadata.AzimutT0)/Metadata.AzimutTi;
+	}	
 	
-	Point.I = (Pos_Module-Metadata.RangeD0)/Metadata.RangeDi;
-	Point.J = (StateVectorsRows[Index[1]].DOY-Metadata.AzimutT0)/Metadata.AzimutTi;
-
 	COORD Result = static_cast<COORD>(Point);
 
 	return Result;
