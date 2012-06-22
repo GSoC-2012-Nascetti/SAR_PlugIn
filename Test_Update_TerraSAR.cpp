@@ -191,7 +191,7 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 
     std::list<GcpPoint> Punti = GCPs->getSelectedPoints();
      
-	Punti = Prova_metadata.UpdateGCP(Punti, path);
+	Punti = Prova_metadata.UpdateGCP(Punti, path, pProgress);
 
 	SAR_Model ModProva(Prova_metadata);
 
@@ -210,7 +210,7 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 			Lon = pList->mCoordinate.mX;
 			Lat = pList->mCoordinate.mY;
 			
-			Punto = ModProva.SAR_GroundToSlant(pList->mCoordinate.mX,pList->mCoordinate.mY,pList->mCoordinate.mZ);
+			Punto = ModProva.SAR_GroundToSlant(pList->mCoordinate.mX,pList->mCoordinate.mY,pList->mCoordinate.mZ); 
 			pList->mRmsError.mX = pList->mPixel.mX -Punto.I;
 			pList->mRmsError.mY = pList->mPixel.mY -Punto.J;
 			accX(pList->mRmsError.mX);
@@ -232,7 +232,7 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 
 		      if (pProgress != NULL)
 		{
-         pProgress->updateProgress("Calculating statistics", n/N, NORMAL);
+         pProgress->updateProgress("Calculating statistics", int(100*n/N), NORMAL);
 		}
 		n++;
 	}
