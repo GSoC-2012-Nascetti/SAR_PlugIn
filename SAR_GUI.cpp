@@ -21,6 +21,10 @@
 #include "SpatialDataWindow.h"
 
 #include "TerraSAR_Metadata.h"
+#include "RADARSAT_Metadata.h"
+#include "SAR_Model.h"
+#include "Stereo_SAR_Model.h"
+#include "StringUtilities.h"
 #include <ProgressResource.h>
 #include "Test_Update_TerraSAR.h"
 
@@ -40,8 +44,6 @@ SAR_GUI::SAR_GUI( QWidget* pParent, const char* pName, bool modal )
    }
    setModal( FALSE );
    setWindowTitle("3D Stero Measurements");
-
-   QGridLayout* pLayout = new QGridLayout( this );
 
    // GUI label creation
    labelImageLeft  = new QLabel( "Select Image Left", this );
@@ -73,45 +75,61 @@ SAR_GUI::SAR_GUI( QWidget* pParent, const char* pName, bool modal )
    Height = new QDoubleSpinBox(this);
 
    mpCancelButton = new QPushButton( "cancelButton", this );
+
+   // GUI Layout 
+   
+   QGridLayout* pLayout = new QGridLayout(this);
    
    pLayout->addWidget( labelImageLeft, 0, 0 );
    pLayout->addWidget( labelImageRight, 0, 3 );
 
    pLayout->addWidget( mpCubeListCombo, 1, 0, 1, 2 );
    pLayout->addWidget( mpCubeListCombo_slave, 1, 3, 1, 2 );
+
+   mpCubeListCombo->setFixedSize(400,20);
+   mpCubeListCombo_slave->setFixedSize(400,20);
    
    pLayout->addWidget( labelImagePoints, 2, 0 );
-    
-   pLayout->addWidget( labelLeftX, 3, 0 );
-   pLayout->addWidget( labelLeftY, 4, 0 );
-   pLayout->addWidget( leftX, 3, 1 );
-   pLayout->addWidget( leftY, 4, 1 );
+      
+   QGridLayout* pLayout2 = new QGridLayout();
 
-   pLayout->addWidget( labelRightX, 3, 3 );
-   pLayout->addWidget( labelRightY, 4, 3 );
-   pLayout->addWidget( rightX, 3, 4 );
-   pLayout->addWidget( rightY, 4, 4 );
-   
+   pLayout2->addWidget( labelLeftX, 0, 0 );
+   pLayout2->addWidget( labelLeftY, 1, 0 );
+   pLayout2->addWidget( leftX, 0, 1 );
+   pLayout2->addWidget( leftY, 1, 1 );
+   pLayout2->addWidget( labelRightX, 0, 3 );
+   pLayout2->addWidget( labelRightY, 1, 3 );
+   pLayout2->addWidget( rightX, 0, 4 );
+   pLayout2->addWidget( rightY, 1, 4 );      
+   QGroupBox* box1 = new QGroupBox();
+   box1->setLayout(pLayout2);
+   pLayout->addWidget( box1, 3, 0,2,5);
+
    pLayout->addWidget( labelGroundPoint, 5, 0 );
+       
+   QGridLayout* pLayout3 = new QGridLayout();
    
-   pLayout->addWidget( labelLat, 6, 0 );
-   pLayout->addWidget( labelLon, 7, 0 );
-   pLayout->addWidget( labelHeight, 6, 3 );
-
-   pLayout->addWidget( Lat,6, 1);
-   pLayout->addWidget( Lon,7, 1);
-   pLayout->addWidget( Height, 6, 4);
+   pLayout3->addWidget( labelLat, 0, 0, Qt::AlignRight );
+   pLayout3->addWidget( labelLon, 1, 0, Qt::AlignRight  );
+   pLayout3->addWidget( labelHeight, 0, 3, Qt::AlignRight );   
+   pLayout3->addWidget( Lat,0, 1);
+   pLayout3->addWidget( Lon,1, 1);
+   pLayout3->addWidget( Height, 0, 4);   
+   QGroupBox* box2 = new QGroupBox();
+   box2->setLayout(pLayout3);
+   pLayout->addWidget( box2, 6, 0,2,3);
 
    pLayout->addWidget( mpCancelButton, 8, 4);
-   pLayout->addWidget( mpGetMapLocation, 8, 0 );
+   pLayout->addWidget( mpGetMapLocation, 8, 0 );   
 
    mpCancelButton->setText("Close");
-   resize( QSize(600, 150).expandedTo(minimumSizeHint()) );
-
+   //resize( QSize(600, 150).expandedTo(minimumSizeHint()) );
+   
    // signals and slots connections
    bool ok = connect( mpCancelButton, SIGNAL( clicked() ), this, SLOT( reject() ) );
    ok = connect( mpGetMapLocation, SIGNAL( clicked() ),this, SLOT( GetMapLocation()));
    init();
+
 }
 
 /*
@@ -119,25 +137,7 @@ SAR_GUI::SAR_GUI( QWidget* pParent, const char* pName, bool modal )
 */
 SAR_GUI::~SAR_GUI()
 {
-   Service<DesktopServices> pDesktop;
 
-   StepResource pStep( "SAR GUI Closed.", "app", "95253952-BA2B-11E1-B31D-37BC6188709B" );
-   if ( mbScalingApplied ) //successful state
-   {
-      pStep->finalize( Message::Success );
-   }
-   else //cancelled state
-   {
-      pStep->finalize( Message::Abort, "Plug-in Cancelled!" );
-   }
-
-   SpatialDataWindow* pScaledWindow = dynamic_cast<SpatialDataWindow*>( pDesktop->getWindow(
-      "scaledCubeWindow", SPATIAL_DATA_WINDOW ) );
-   if ( pScaledWindow != NULL )
-   {
-      pDesktop->deleteWindow( pScaledWindow );
-      pScaledWindow = NULL;
-   }
 }
 
 void SAR_GUI::init()
@@ -181,131 +181,128 @@ void SAR_GUI::init()
 
 }
   
- 
-void SAR_GUI::generateNewView()
-               
-	{
-	/*
-   Service<DesktopServices> pDesktop;
+void SAR_GUI::GetMapLocation()
+{
+	Service<ModelServices> pModel;
 
-   Service<ModelServices> pModel;
+	ProgressResource pProgress("pProgress");
 
-   ProgressResource pProgress("pProgress");
-
-   pProgress->updateProgress("Pluto", 0, NORMAL);
+    pProgress->updateProgress("Pluto", 0, NORMAL);
     
-   
+	name_left = mCubeNames.at(mpCubeListCombo->currentIndex());
+	name_right = mCubeNames.at(mpCubeListCombo_slave->currentIndex());
 
-   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(pDesktop->getWindow(mCubeNames.at(
-      mpCubeListCombo->currentIndex()), SPATIAL_DATA_WINDOW));
-   
-   prova = "pluto";
+    RasterElement *pCube_Left =  dynamic_cast<RasterElement*>(pModel->getElement(name_left,"",NULL ));
+	RasterElement *pCube_Right = dynamic_cast<RasterElement*>(pModel->getElement(name_right,"",NULL ));
+    
+	std::string path_left =  pCube_Left->getFilename();
+	std::string path_right = pCube_Right->getFilename();
 
-   if (prova.compare("pluto")==0 ){
-	   prova = "pippo";
-   }
-   
-   prova = mCubeNames.at(mpCubeListCombo->currentIndex());
+	DataDescriptor* dMeta_Left =  pCube_Left->getDataDescriptor();
+	DataDescriptor* dMeta_Right = pCube_Right->getDataDescriptor();
 
-  // DataElement *pElem = dynamic_cast<DataElement*>(pModel->getElement(mCubeNames.at(
-    //  mpCubeListCombo->currentIndex()),"",NULL ));
-
-      RasterElement *pCube = dynamic_cast<RasterElement*>(pModel->getElement(mCubeNames.at(
-      mpCubeListCombo->currentIndex()),"",NULL ));
-   
-   
-   //  ********************************************************************************** //
-
-   RasterDataDescriptor* pDesc = static_cast<RasterDataDescriptor*>(pCube->getDataDescriptor());
-
-   FactoryResource<DataRequest> pRequest;
-   DataAccessor pAcc = pCube->getDataAccessor(pRequest.release());
-
-   double min = std::numeric_limits<double>::max();
-   double max = -min;
-   
-   double total = 0.0; 
-
-   for (unsigned int row = 0; row < pDesc->getRowCount(); ++row)
-   {
-      for (unsigned int col = 0; col < pDesc->getColumnCount(); ++col)
-      {		 
-		 total+= Service<ModelServices>()->getDataValue(pDesc->getDataType(), pAcc->getColumn(), COMPLEX_MAGNITUDE, 0);
-
-		 pAcc->nextColumn();
-      }
-      pAcc->nextRow();
-	   pProgress->updateProgress("computing", int(100*row/pDesc->getRowCount()), NORMAL);
-   }
-
-   pProgress->updateProgress("end", 100, NORMAL);
-   
-   std::string path = pCube->getFilename();
-
-   DataDescriptor* dMeta = pCube->getDataDescriptor();
-
-   DynamicObject* Metadata = dMeta->getMetadata();
+	DynamicObject* Metadata_Left = dMeta_Left->getMetadata();
+	DynamicObject* Metadata_Right = dMeta_Right->getMetadata();
 
 	// RETRIEVE & UPDATE METADATA INFORMATION //
 		   
-	TerraSAR_Metadata Prova_metadata;
+	RADARSAT_Metadata SAR_Metadata_Left,SAR_Metadata_Right;
 
-	Prova_metadata.ReadFile(path);
+	// Update Metadata Left
+	SAR_Metadata_Left.ReadFile(path_left);
 
-    bool control = Prova_metadata.ReadFile(path);
+    bool control = SAR_Metadata_Left.ReadFile(path_left);
 
 	if (control == false)
 	{
-	std::string msg = "This is not a TerraSAR-X SLC Files, Metadata can't be updated";
-	pProgress->updateProgress(msg, 100, ERRORS);
-	
+	std::string msg = "This is not a RADARSAT-2 Stereopair";
+	pProgress->updateProgress(msg, 100, ERRORS);	
 	}
 
-	Prova_metadata.UpdateMetadata(Metadata); 
+	SAR_Metadata_Left.UpdateMetadata(Metadata_Left); 
 
+	// Update Metadata Right	
+	SAR_Metadata_Right.ReadFile(path_right);
 
-   //  ********************************************************************************** //
+    control = SAR_Metadata_Right.ReadFile(path_right);
 
-   if (pWindow != NULL)
-   {
-      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pWindow->getView());
-      if (pView != NULL)
-      {
-         Layer* pLayer = pView->getTopMostLayer(RASTER);
-         if (pLayer != NULL)
-         {
-            SpatialDataWindow* pScaledWindow =
-               dynamic_cast<SpatialDataWindow*>(pDesktop->createWindow("scaledCubeWindow", SPATIAL_DATA_WINDOW));
-            
-			pScaledWindow->signalsEnabled();
+	if (control == false)
+	{
+	std::string msg = "This is not a RADARSAT-2 Stereopair";
+	pProgress->updateProgress(msg, 100, ERRORS);	
+	}
 
-			if (pScaledWindow != NULL)
-            {
-               SpatialDataView* pScaledView = dynamic_cast<SpatialDataView*>(pScaledWindow->getView());
-               if (pScaledView != NULL)
-               {
-                  mpScaledLayer = pLayer->copy(std::string(), true, pLayer->getDataElement());
-                  pScaledView->addLayer(mpScaledLayer);
-                  pScaledView->refresh();
-                  pScaledView->zoomExtents();
-				  
-				  pScaledView->signalMousePanEnabled();
-				  pScaledView->panToCenter();
+	SAR_Metadata_Right.UpdateMetadata(Metadata_Right);
 
-                  mpXScaleFactor->setEnabled(true);
-                  mpYScaleFactor->setEnabled(true);
-                  mpApplyButton->setEnabled(true);
-               }
-            }
-         }
-      }
-   }*/
-}
+	// STEREO MODEL INITIALITATION //
 
-void SAR_GUI::GetMapLocation()
-{
+	SAR_Model *Model_Left;
+	Model_Left = new SAR_Model(SAR_Metadata_Left);
+	
+	SAR_Model *Model_Right; 
+	Model_Right = new SAR_Model(SAR_Metadata_Right);
 
+	Stereo_SAR_Model sModel (Model_Left,Model_Right);
 
+	// RADARSAT IMAGE COORDINATE INVERSION //
+	
+	double Lx=0.0,Ly=0.0,Rx=0.0,Ry=0.0;
+
+	if (SAR_Metadata_Left.SatelliteName == "RADARSAT-2")
+	{
+		if (SAR_Metadata_Left.Orbit == "Ascending" && SAR_Metadata_Left.SideLooking =="Right") 
+		{
+			Lx = leftX->value();
+			Ly = (SAR_Metadata_Left.Height-1)-leftY->value();
+		}
+		if (SAR_Metadata_Left.Orbit == "Descending" && SAR_Metadata_Left.SideLooking =="Right")
+		{
+			Lx = (SAR_Metadata_Left.Width-1)-leftX->value();
+			Ly = leftY->value();
+		}			
+	}
+	else
+	{
+		Lx = leftX->value();
+		Ly = leftY->value();
+	}
+
+	if (SAR_Metadata_Right.SatelliteName == "RADARSAT-2")
+	{
+		if (SAR_Metadata_Right.Orbit == "Ascending" && SAR_Metadata_Right.SideLooking =="Right") 
+		{
+			Rx = rightX->value();
+			Ry = (SAR_Metadata_Right.Height-1)-rightY->value();
+		}
+		if (SAR_Metadata_Right.Orbit == "Descending" && SAR_Metadata_Right.SideLooking =="Right")
+		{
+			Rx = (SAR_Metadata_Right.Width-1)-rightX->value();
+			Ry = rightY->value();
+		}			
+	}
+	else
+	{
+		Rx = rightX->value();
+		Ry = rightY->value();
+
+	}
+	
+	// RETRIEVE 3D COORDINATE //
+	COORD_Ecef Result = sModel.Stereo_SAR_SlantToGround(Lx,Ly,Rx,Ry);
+
+	Lat->setValue(Result.Latitude);
+	Lon->setValue(Result.Longitude);
+	Height->setValue(Result.Height);
+	
+	std::string msg = "Coord X Ecef : " + StringUtilities::toDisplayString(Result.X_Ecef) + "\n"
+					  "Coord Y Ecef : " + StringUtilities::toDisplayString(Result.Y_Ecef) + "\n"
+					  "Coord Z Ecef : " + StringUtilities::toDisplayString(Result.Z_Ecef) + "\n"
+					  "Coord Lon : " + StringUtilities::toDisplayString(Result.Longitude) + "\n"
+					  "Coord Lat : " + StringUtilities::toDisplayString(Result.Latitude) + "\n"
+					  "Coord Height : " + StringUtilities::toDisplayString(Result.Height) + "\n";	
+				  						                      
+	pProgress->updateProgress(msg, 100, NORMAL);
+	
 }
 
 

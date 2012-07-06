@@ -11,6 +11,7 @@
 #define SAR_GUI_H
 
 #include <QtGui\QDialog>
+#include <QtGui/QGroupBox>
 #include "PlotWidget.h"
 #include "DockWindow.h"
 #include "Layer.h"
@@ -27,11 +28,10 @@ public:
     SAR_GUI( QWidget* pParent = 0, const char* pName = 0, bool modal = FALSE );
     ~SAR_GUI();
 
-	std::string prova;
+	std::string prova,name_left,name_right;
 
 public slots:
 
-    void generateNewView();
 	void GetMapLocation();
 
 private:
@@ -46,8 +46,8 @@ private:
    QComboBox* mpCubeListCombo;
    QComboBox* mpCubeListCombo_slave;
 
-   QDoubleSpinBox* mpXScaleFactor;
-   QDoubleSpinBox* mpYScaleFactor;
+   //QDoubleSpinBox* mpXScaleFactor;
+   //QDoubleSpinBox* mpYScaleFactor;
 
    QDoubleSpinBox* leftX;
    QDoubleSpinBox* rightX;
@@ -70,8 +70,6 @@ private:
    QLabel* labelLat;
    QLabel* labelLon;
    QLabel* labelHeight;
-
-
 
    void init();
    std::vector<std::string> mCubeNames;
