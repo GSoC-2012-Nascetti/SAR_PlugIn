@@ -328,14 +328,6 @@ std::list<GcpPoint> TerraSAR_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, 
 	XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* pResult;
 
 	int n=1;
-
-	/* current = "fn:tokenize(//geolocationGrid/gridPoint/lon/text(), '\\s+')";
-	pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::ITERATOR_RESULT_TYPE);
-	pList->mCoordinate.mZ = static_cast<double>(pResult->getNumberValue());	
-
-	pResult->iterateNext();
-	pList->mCoordinate.mZ = static_cast<double>(pResult->getNumberValue()); */
-	
 	
 	for (pList = PuntiGCPs.begin(); pList != PuntiGCPs.end(); pList++)
 	{

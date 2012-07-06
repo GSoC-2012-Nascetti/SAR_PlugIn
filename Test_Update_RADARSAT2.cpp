@@ -194,7 +194,7 @@ bool Test_Update_RADARSAT2::execute(PlugInArgList* pInArgList, PlugInArgList* pO
 
     std::list<GcpPoint> Punti = GCPs->getSelectedPoints();
      
-	Punti = Prova_metadata.UpdateGCP(Punti, path);
+	Punti = Prova_metadata.UpdateGCP(Punti, path, pProgress);
 
 	SAR_Model ModProva(Prova_metadata);
 
@@ -270,64 +270,3 @@ bool Test_Update_RADARSAT2::execute(PlugInArgList* pInArgList, PlugInArgList* pO
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   /*std::list<GcpPoint> Punti = GCPs->getSelectedPoints();
-
-   double XX = Punti.front().mCoordinate.mX ;
-   double YY = Punti.front().mCoordinate.mY ;
-   double ZZ = Punti.front().mCoordinate.mZ ;
-   double JJ = Punti.front().mPixel.mX ;
-   double II = Punti.front().mPixel.mY ;
-
-   
-
-   Punti.front().mRmsError.mX = 100.15;
-
-
-     
-	//   ************************************************************************************ //
-
-	
-	// ****************** TEST MODEL CLASS ***********************************
-
-	double ppppp = Prova_metadata.StateVectors[0].X;
-
-	SAR_Model Pluto(Prova_metadata);
-
-	double ssss = Pluto.StateVectorsRows[0].VelocityX;
-
-	//   ************************************************************************************ // 
-
-	if (pProgress != NULL)
-	{
-		std::string msg = "Number of Rows : " + StringUtilities::toDisplayString(pDesc->getRowCount()) + "\n"
-						  "Number of Columns : " + StringUtilities::toDisplayString(pDesc->getColumnCount()) + "\n\n"
-						  "XML file path : " + StringUtilities::toDisplayString(path) + "\n\n"
-						  "Coordinate : " + StringUtilities::toDisplayString(II) + " " + StringUtilities::toDisplayString(JJ) + "\n\n"
-						  "Coordinate : " + StringUtilities::toDisplayString(XX) + " " +"\n\n"
-						  "Coordinate : " + StringUtilities::toDisplayString(YY) + " " +"\n\n"
-						  "Coordinate : " + StringUtilities::toDisplayString(ZZ) + " " +"\n\n"
-						  "Metadata update completed: " + "\n";
-				  						                      
-		pProgress->updateProgress(msg, 100, NORMAL);
-	}
-
-	pStep->finalize(); 
-
-	return true;
-}*/

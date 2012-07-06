@@ -193,7 +193,7 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
      
 	Punti = Prova_metadata.UpdateGCP(Punti, path, pProgress);
 
-	SAR_Model ModProva(Prova_metadata);
+	SAR_Model ModProva(Prova_metadata,100);
 
 	COORD Punto;
 	int N=Punti.size();
