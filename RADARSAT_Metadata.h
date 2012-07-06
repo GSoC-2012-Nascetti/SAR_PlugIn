@@ -29,7 +29,7 @@ public:
 	//Methods//
 	bool ReadFile(std::string);
 	void UpdateMetadata(DynamicObject*);
-	std::list<GcpPoint> UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path);
+	std::list<GcpPoint> UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path, Progress *pProgress);
 
 };
 

@@ -8,12 +8,17 @@
 */
 
 #include "AppVerify.h"
+#include "Progress.h"
 #include "RADARSAT_Metadata.h"
 #include "stdlib.h"
 #include "sstream"
 #include "XercesIncludes.h"
 #include "xmlreader.h" 
 #include "xmlreaderSAR.h" 
+
+#include <iostream>
+#include <fstream>
+using namespace std;
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -113,7 +118,7 @@ bool RADARSAT_Metadata::ReadFile(std::string path)
 	//AzimutTi = 86400*(AzimutTi-AzimutT0)/double(Height); //DOY
 	AzimutTi = (AzimutTi-AzimutT0)/double(Height-1);
 
-    if (AzimutTi <0.0) //Prova per RADARSAT-2
+    if (AzimutTi <0.0) 
 		{
 			AzimutT0 = AzimutT0+AzimutTi*(Height-1);
 			AzimutTi = -AzimutTi;
@@ -122,6 +127,26 @@ bool RADARSAT_Metadata::ReadFile(std::string path)
 	
 	RangeDi = ColumnSpacing;
 
+	//COMPUTE CORNER INDEX
+
+	int C2,C3,C4,Nx,Ny;
+	std::stringstream index;
+
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[2]/imageCoordinate/pixel/text())", DefaultNamespace,
+						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+	double DX = static_cast<double>(pResult->getNumberValue());
+
+	Nx = int(Width/DX)+1;
+	C2 = Nx;
+	index<<(C2+1);
+
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/line/text())", DefaultNamespace,
+						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+	double DY = static_cast<double>(pResult->getNumberValue());
+
+	Ny = int(Height/DY)+1;
+	C3 = Nx*(Ny-1)+1;
+	C4 = Nx*Ny;
 
 	// RETRIVE CORNER COORDINATE //
 
@@ -141,51 +166,63 @@ bool RADARSAT_Metadata::ReadFile(std::string path)
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[1].Height = static_cast<double>(pResult->getNumberValue());	
 
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[16]/imageCoordinate/pixel/text())", DefaultNamespace,
+	index.str(string());
+	index.clear();
+	index<<C2;
+
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/pixel/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[2].J = static_cast<int>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[16]/imageCoordinate/line/text())", DefaultNamespace,
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/line/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[2].I = static_cast<int>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[16]/geodeticCoordinate/latitude/text())", DefaultNamespace,
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/latitude/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[2].Latitude = static_cast<double>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[16]/geodeticCoordinate/longitude/text())", DefaultNamespace,
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/longitude/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[2].Longitude = static_cast<double>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[16]/geodeticCoordinate/height/text())", DefaultNamespace,
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/height/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[2].Height = static_cast<double>(pResult->getNumberValue());
 
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[209]/imageCoordinate/pixel/text())", DefaultNamespace,
+	index.str(string());
+    index.clear();
+	index<<C3;
+
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/pixel/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[3].J = static_cast<int>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[209]/imageCoordinate/line/text())", DefaultNamespace,
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/line/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[3].I = static_cast<int>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[209]/geodeticCoordinate/latitude/text())", DefaultNamespace,
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/latitude/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[3].Latitude = static_cast<double>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[209]/geodeticCoordinate/longitude/text())", DefaultNamespace, 
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/longitude/text())", DefaultNamespace, 
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[3].Longitude = static_cast<double>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[209]/geodeticCoordinate/height/text())", DefaultNamespace, 
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/height/text())", DefaultNamespace, 
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[3].Height = static_cast<double>(pResult->getNumberValue());
 
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[224]/imageCoordinate/pixel/text())", DefaultNamespace,
+	index.str(string());
+    index.clear();
+	index<<C4;
+
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/pixel/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[4].J = static_cast<int>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[224]/imageCoordinate/line/text())", DefaultNamespace,
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/line/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[4].I = static_cast<int>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[224]/geodeticCoordinate/latitude/text())", DefaultNamespace,
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/latitude/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[4].Latitude = static_cast<double>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[224]/geodeticCoordinate/longitude/text())", DefaultNamespace,
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/longitude/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[4].Longitude = static_cast<double>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[224]/geodeticCoordinate/height/text())", DefaultNamespace,
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/height/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[4].Height = static_cast<double>(pResult->getNumberValue());
 
@@ -194,7 +231,7 @@ bool RADARSAT_Metadata::ReadFile(std::string path)
 	NumStateVectors = 5;
 	StateVectors.resize(NumStateVectors);
 	
-		for (int n=1; n<=NumStateVectors; n++ )
+	for (int n=1; n<=NumStateVectors; n++ )
 	{
 		std::stringstream num;
 		num<<n;
@@ -301,7 +338,7 @@ void RADARSAT_Metadata::UpdateMetadata(DynamicObject* DynamicMetadata)
 
 }
 
-std::list<GcpPoint> RADARSAT_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path)
+std::list<GcpPoint> RADARSAT_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path, Progress *pProgress)
 {
 	int N=0;
 	N = PuntiGCPs.size();
@@ -330,9 +367,15 @@ std::list<GcpPoint> RADARSAT_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, 
 		pResult = xml.queryNamespace(current,DefaultNamespace, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 		pList->mCoordinate.mZ = static_cast<double>(pResult->getNumberValue());	
 	    
-		current = "xs:double(//geolocationGrid/imageTiePoint["+num.str()+"]/imageCoordinate/line/text())";
-		pResult = xml.queryNamespace(current,DefaultNamespace, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-		pList->mPixel.mY = static_cast<double>(pResult->getNumberValue());
+	    pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+num.str()+"]/geodeticCoordinate/latitude/text())", DefaultNamespace,
+						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		pList->mCoordinate.mY = static_cast<double>(pResult->getNumberValue());
+	    
+		pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+num.str()+"]/geodeticCoordinate/longitude/text())", DefaultNamespace,
+						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+	    pList->mCoordinate.mX = static_cast<double>(pResult->getNumberValue());
+		
+		pProgress->updateProgress("Update GCPs Information",int(100*n/N), NORMAL);		
 		n++;
 
 	}
