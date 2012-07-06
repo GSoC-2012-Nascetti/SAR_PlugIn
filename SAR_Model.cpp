@@ -126,17 +126,37 @@ STATEVECTOR LagrangeInterpolation (double AzimuthTime, std::vector<STATEVECTOR> 
 
 SAR_Model::SAR_Model(SAR_Metadata &InputMetadata)
 {
+	PrecisionIndex = 10;
 	Metadata = InputMetadata;
 	
-	StateVectorsRows.resize(100*Metadata.Height);
+	StateVectorsRows.resize(PrecisionIndex*Metadata.Height);
 
 	// Computation of Lagrange coefficients using State Vectors position&velocity //
 	OrbitCoeff = LagrangeCoeff(Metadata.StateVectors);
 	
 	// Computation of satellite position&velocity for each rows using Lagrange interpolator //  
-	for (int i=0; i<100*Metadata.Height; i++) 
+	for (int i=0; i<PrecisionIndex*Metadata.Height; i++) 
 	{		
-		Time = Metadata.AzimutT0 + (Metadata.AzimutTi/100.0)*i;
+		Time = Metadata.AzimutT0 + (Metadata.AzimutTi/PrecisionIndex)*i;
+		StateVectorsRows[i] = LagrangeInterpolation(Time,Metadata.StateVectors,OrbitCoeff);
+	}
+
+}
+
+SAR_Model::SAR_Model(SAR_Metadata &InputMetadata, int Precision)
+{
+	PrecisionIndex = Precision;
+	Metadata = InputMetadata;
+	
+	StateVectorsRows.resize(PrecisionIndex*Metadata.Height);
+
+	// Computation of Lagrange coefficients using State Vectors position&velocity //
+	OrbitCoeff = LagrangeCoeff(Metadata.StateVectors);
+	
+	// Computation of satellite position&velocity for each rows using Lagrange interpolator //  
+	for (int i=0; i<PrecisionIndex*Metadata.Height; i++) 
+	{		
+		Time = Metadata.AzimutT0 + (Metadata.AzimutTi/PrecisionIndex)*i;
 		StateVectorsRows[i] = LagrangeInterpolation(Time,Metadata.StateVectors,OrbitCoeff);
 	}
 
@@ -184,7 +204,7 @@ COORD SAR_Model::SAR_GroundToSlant(double Lon,double Lat, double H)
 	vector<int> Index;
 	Index.resize(3); 
 	Index[0]= 0;
-	Index[2]= 100*Metadata.Height-1;
+	Index[2]= PrecisionIndex*Metadata.Height-1;
 	Index[1]= int(((Index[0]+Index[2])/2));
 
 	while ( (abs((T_Angles[1]-Pi_Greco)/2) > 0.00000001) && (Index[0] != Index[1])) 

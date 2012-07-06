@@ -36,6 +36,7 @@ class SAR_Model
 {
 public:
 	SAR_Model(SAR_Metadata &);
+	SAR_Model(SAR_Metadata &, int);
 	~SAR_Model(void);
 
 	COORD SAR_GroundToSlant(double Lon,double Lat,double H);
@@ -47,5 +48,6 @@ public:
 	std::vector<STATEVECTOR> StateVectorsRows;
 	std::vector<OrbitCoefficients> OrbitCoeff;
 
+	int PrecisionIndex;
 };
 
