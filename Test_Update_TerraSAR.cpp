@@ -230,7 +230,7 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 			pList->mCoordinate.mY = Lon;
 		}
 
-		      if (pProgress != NULL)
+		if (pProgress != NULL)
 		{
          pProgress->updateProgress("Calculating statistics", int(100*n/N), NORMAL);
 		}

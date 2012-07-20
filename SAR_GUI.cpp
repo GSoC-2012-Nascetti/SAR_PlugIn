@@ -82,7 +82,7 @@ SAR_GUI::SAR_GUI( QWidget* pParent, const char* pName, bool modal )
 
    mpCancelButton = new QPushButton( "cancelButton", this );
 
-   QCheckBox* pEnableGetCoordinate = new QCheckBox("Enable cursor to get image coordinate", this);
+   QCheckBox* pEnableGetCoordinate = new QCheckBox("Enable mouse to get image coordinate", this);
 
    // GUI Layout Design
    
@@ -301,10 +301,10 @@ void SAR_GUI::GetMapLocation()
 	// STEREO MODEL INITIALITATION //
 
 	SAR_Model *Model_Left;
-	Model_Left = new SAR_Model(SAR_Metadata_Left);
+	Model_Left = new SAR_Model(SAR_Metadata_Left,100);
 	
 	SAR_Model *Model_Right; 
-	Model_Right = new SAR_Model(SAR_Metadata_Right);
+	Model_Right = new SAR_Model(SAR_Metadata_Right,100);
 
 	Stereo_SAR_Model sModel (Model_Left,Model_Right);
 

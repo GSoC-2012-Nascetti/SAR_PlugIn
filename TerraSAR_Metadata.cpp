@@ -12,6 +12,7 @@
 #include "stdlib.h"
 #include "sstream"
 #include "TerraSAR_Metadata.h"
+#include "ProgressResource.h"
 #include "XercesIncludes.h"
 #include "xmlreader.h" 
 
@@ -307,6 +308,55 @@ void TerraSAR_Metadata::UpdateMetadata(DynamicObject* DynamicMetadata)
 
 std::list<GcpPoint> TerraSAR_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path, Progress *pProgress)
 {
+	int N=0;
+	N = PuntiGCPs.size();
+	size_t pos;
+	std::string path2;
+	pos = path.find_last_of("/");
+	path2 = path.substr(0,pos);
+	path2 += "/ANNOTATION/GEOREF.xml";
+
+	XmlReaderSAR xml(Service<MessageLogMgr>()->getLog(), false);
+	
+	if (path2.empty() || xml.parse(path2) == NULL)
+	{
+      return PuntiGCPs;
+	}
+
+	list<GcpPoint>::iterator pList;	
+
+	std::string current;
+	XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* pResult;
+
+	int n=1;
+	
+	for (pList = PuntiGCPs.begin(); pList != PuntiGCPs.end(); pList++)
+	{
+		std::stringstream num;
+		num<<n;
+		current = "xs:double(//geolocationGrid/gridPoint["+num.str()+"]/lon/text())";
+		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		pList->mCoordinate.mX = static_cast<double>(pResult->getNumberValue());	
+		current = "xs:double(//geolocationGrid/gridPoint["+num.str()+"]/lat/text())";
+		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		pList->mCoordinate.mY = static_cast<double>(pResult->getNumberValue());	
+
+		current = "xs:double(//geolocationGrid/gridPoint["+num.str()+"]/height/text())";
+		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		pList->mCoordinate.mZ = static_cast<double>(pResult->getNumberValue());	
+
+		n++;
+		pProgress->updateProgress("Update GCPs Information",int(100*n/N), NORMAL);
+
+	}
+
+	return PuntiGCPs;
+}
+
+std::list<GcpPoint> TerraSAR_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path)
+{
+	ProgressResource pProgress("ProgressBar");
+
 	int N=0;
 	N = PuntiGCPs.size();
 	size_t pos;

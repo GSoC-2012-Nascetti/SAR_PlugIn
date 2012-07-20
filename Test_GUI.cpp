@@ -16,9 +16,14 @@
 #include "ModelServices.h"
 #include "Test_GUI.h"
 #include "SAR_GUI.h"
+#include "Ortho_GUI.h"
 #include "PlugInRegistration.h"
 #include "Service.h"
 #include "SessionItemSerializer.h"
+
+#include "Window.h"
+#include "SpatialDataView.h"
+#include "SpatialDataWindow.h"
 
 REGISTER_PLUGIN_BASIC(OpticksSAR, Test_GUI);
 
@@ -27,11 +32,11 @@ Test_GUI::Test_GUI() :
 {
    setCreator("Opticks Community");
    setVersion("Sample");
-   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
+   setCopyright("Copyright(c) 2012, Andrea Nascetti <andreanascetti@gmail.com>");
    setProductionStatus(false);
    ViewerShell::setName("Test SAR GUI");
    setDescription("Verifies MPR1 Requirement 180.");
-   setMenuLocation("[SAR PlugIn]\\Test GUI");
+   setMenuLocation("[SAR PlugIn]\\3D Stereo Measurement");
    setDescriptorId("{701D7CC4-BA34-11E1-B257-E0C36188709B}");
    destroyAfterExecute(false);
    setWizardSupported(false);
@@ -57,14 +62,15 @@ bool Test_GUI::showGui()
 
    mpGui = new SAR_GUI( pDesktop->getMainWidget(), "test", false );
    connect( mpGui, SIGNAL( finished( int ) ), this, SLOT( dialogClosed() ) );
+   
    mpGui->show();
 
-   pStep->finalize( Message::Success );
+   pStep->finalize(Message::Success);
    return true;
 }
 
 bool Test_GUI::execute( PlugInArgList* inputArgList, PlugInArgList* outputArgList )
-{  
+{  	
 	return showGui();
 }
 
