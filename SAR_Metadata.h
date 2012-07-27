@@ -16,7 +16,7 @@
 
 using namespace std;
 
-struct COORD
+struct P_COORD
 {
 	double I;
 	double J;	
@@ -66,7 +66,7 @@ public:
 
 	// COORDINATE SCENE //
 	double SceneHeight;
-	std::vector<COORD> CornerCoordinate;
+	std::vector<P_COORD> CornerCoordinate;
 
 	// STATE VECTORS INFORMATION //
 	int NumStateVectors;

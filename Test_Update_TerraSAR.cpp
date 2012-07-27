@@ -195,7 +195,7 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 
 	SAR_Model ModProva(Prova_metadata,100);
 
-	COORD Punto;
+	P_COORD Punto;
 	int N=Punti.size();
 	int n=0;
 	double Lat, Lon;

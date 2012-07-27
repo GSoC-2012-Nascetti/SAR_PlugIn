@@ -21,7 +21,7 @@ struct OrbitCoefficients
 	double Vz;
 }; 
 
-struct COORD_Ecef: public COORD
+struct COORD_Ecef: public P_COORD
 {
 	double X_Ecef;
 	double Y_Ecef;
@@ -39,7 +39,7 @@ public:
 	SAR_Model(SAR_Metadata &, int);
 	~SAR_Model(void);
 
-	COORD SAR_GroundToSlant(double Lon,double Lat,double H);
+	P_COORD SAR_GroundToSlant(double Lon,double Lat,double H);
 
 	double Time;
 	SAR_Metadata Metadata;

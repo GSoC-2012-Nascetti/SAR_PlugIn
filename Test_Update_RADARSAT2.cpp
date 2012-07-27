@@ -198,7 +198,7 @@ bool Test_Update_RADARSAT2::execute(PlugInArgList* pInArgList, PlugInArgList* pO
 
 	SAR_Model ModProva(Prova_metadata);
 
-	COORD Punto;
+	P_COORD Punto;
 	int N=Punti.size();
 	int n=0;
 	double Lat, Lon;

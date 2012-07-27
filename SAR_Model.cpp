@@ -166,7 +166,7 @@ SAR_Model::~SAR_Model(void)
 {
 }
 
-COORD SAR_Model::SAR_GroundToSlant(double Lon,double Lat, double H) 
+P_COORD SAR_Model::SAR_GroundToSlant(double Lon,double Lat, double H) 
 {
 	COORD_Ecef Point, Control;
 
@@ -259,7 +259,7 @@ COORD SAR_Model::SAR_GroundToSlant(double Lon,double Lat, double H)
 		Point.J = (StateVectorsRows[Index[1]].DOY-Metadata.AzimutT0)/Metadata.AzimutTi;
 	}	
 	
-	COORD Result = static_cast<COORD>(Point);
+	P_COORD Result = static_cast<P_COORD>(Point);
 
 	return Result;
 }
