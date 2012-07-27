@@ -12,10 +12,12 @@
 #include "DataAccessorImpl.h"
 #include "DesktopServices.h"
 #include "DynamicObject.h"
+#include "GeoPoint.h"
 #include "Layer.h"
 #include "LayerList.h"
 #include "ModelServices.h"
 #include "Ortho_GUI.h"
+#include "Orthorectification.h"
 #include "PlugInResource.h"
 #include "Progress.h"
 #include "ProgressResource.h"
@@ -23,26 +25,34 @@
 #include "StringUtilities.h"
 #include "UtilityServices.h"
 
-#include <QtCore/QFileInfo>
-#include <QtGui/QComboBox>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtCore/QStringList>
 #include <Qt/qevent.h>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMessageBox>
-#include <QtGui/QCheckBox>
+#include <QtCore/QFileInfo>
 #include <QtCore/QObject>
+#include <QtCore/QStringList>
 #include <QtGui/QAction>
 #include <QtGui/QButtonGroup>
+#include <QtGui/QCheckBox>
+#include <QtGui/QComboBox>
 #include <QtGui/QDialogButtonBox>
+#include <QtGui/QDoubleSpinBox>
+#include <QtGui/QGridLayout>
+#include <QtGui/QInputDialog>
+#include <QtGui/QLabel>
+#include <QtGui/QMessageBox>
+#include <QtGui/QPushButton>
 
-#include "boost\accumulators\accumulators.hpp"
-#include "boost\accumulators\statistics\stats.hpp"
-#include "boost\accumulators\statistics\mean.hpp"
-#include "boost\accumulators\statistics\variance.hpp"
+#include "boost/accumulators/accumulators.hpp"
+#include "boost/accumulators/statistics/stats.hpp"
+#include "boost/accumulators/statistics/mean.hpp"
+#include "boost/accumulators/statistics/variance.hpp"
+#include "boost/lexical_cast.hpp"
+
+#include <vector>
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+
+using namespace std;
 
 using namespace boost::accumulators;
 
@@ -161,6 +171,7 @@ Ortho_GUI::Ortho_GUI( QWidget* pParent, const char* pName, bool modal )
    VERIFYNRV(connect( mpCancelButton, SIGNAL( clicked() ), this, SLOT( reject() )));
    VERIFYNRV(connect( mpCheckImage, SIGNAL( clicked() ), this, SLOT( CheckImage() )));
    VERIFYNRV(connect( mpCheckModel, SIGNAL( clicked() ), this, SLOT( CheckModel() )));
+   VERIFYNRV(connect( mpStartOrtho, SIGNAL( clicked() ), this, SLOT( StartOrtho() )));
    VERIFYNRV(connect(mpFlatten, SIGNAL(toggled(bool)), box3, SLOT(setEnabled(bool))));
    VERIFYNRV(connect(mpDsm, SIGNAL(toggled(bool)), box4, SLOT(setEnabled(bool))));
 
@@ -171,7 +182,6 @@ Ortho_GUI::Ortho_GUI( QWidget* pParent, const char* pName, bool modal )
 Ortho_GUI::~Ortho_GUI(void)
 {
 }
-
 
 void Ortho_GUI::init()
 {
@@ -189,11 +199,11 @@ void Ortho_GUI::init()
 
    X_Spacing->setMinimum(0);
    X_Spacing->setDecimals(3);
-   X_Spacing->setMaximum(5000);
+   X_Spacing->setMaximum(50000000);
 
    Y_Spacing->setMinimum(0);
    Y_Spacing->setDecimals(3);
-   Y_Spacing->setMaximum(5000);
+   Y_Spacing->setMaximum(50000000);
 
    Height->setMinimum(-100);
    Height->setDecimals(4);
@@ -212,12 +222,47 @@ void Ortho_GUI::init()
 
 void Ortho_GUI::StartOrtho()
 {
+	mpStartOrtho->setEnabled(false);
+
+	// Update Grid Information
+   OrthoGrid.X_Step = X_Spacing->value();
+   OrthoGrid.Y_Step = Y_Spacing->value();
+
+   OrthoGrid.X_Dim = int(OrthoGrid.X_Dim/OrthoGrid.X_Step)+1.0;
+   OrthoGrid.Y_Dim = int(OrthoGrid.Y_Dim/OrthoGrid.Y_Step)+1.0; 
+
+   OrthoGrid.Lon_Step = (OrthoGrid.Lon_Max-OrthoGrid.Lon_Min)/OrthoGrid.X_Dim;
+   
+   OrthoGrid.Lat_Step = (OrthoGrid.Lat_Max-OrthoGrid.Lat_Min)/OrthoGrid.Y_Dim;
+
+   //Start Ortho
+   RasterDataDescriptor* pDesc = static_cast<RasterDataDescriptor*>(pCube->getDataDescriptor());
+
+   FactoryResource<DataRequest> pRequest;
+   DataAccessor pAcc = pCube->getDataAccessor(pRequest.release());
+
+   DataDescriptor* dMeta = pCube->getDataDescriptor();
+
+   DynamicObject* oMetadata = dMeta->getMetadata();
+
+	// RETRIEVE & UPDATE METADATA INFORMATION //
+
+	bool control = Metadata.ReadFile(image_path);
+
+	Metadata.UpdateMetadata(oMetadata); 
+
+	SAR_Model *ModProva;
+		
+	ModProva = new SAR_Model(Metadata,100);
+
+	Orthorectification ProcessOrtho(pCube, ModProva, OrthoGrid, Height->value());
+
+	ProcessOrtho.execute();
 
 }
 
 void Ortho_GUI::CheckButton(QAbstractButton* pButton)
 {
-
    if (pButton == mpFlatten)
    {
        box3->setEnabled(true);
@@ -228,11 +273,12 @@ void Ortho_GUI::CheckButton(QAbstractButton* pButton)
 	   box3->setEnabled(false);
 	   box4->setEnabled(true);
    }
-
 }
 
 void Ortho_GUI::CheckImage()
 {
+   mpCheckImage->setEnabled(false);
+	
    Service<ModelServices> pModel;	
 
    image_name = mCubeNames.at(mpImageListCombo->currentIndex());
@@ -257,14 +303,15 @@ void Ortho_GUI::CheckImage()
    box2->setEnabled(true);
    box3->setEnabled(true);
 
+   mpImageListCombo->setEnabled(false);
+
+   Height->setValue(Metadata.CornerCoordinate[0].Height);
+
+   ComputeGrid();
 }
 
 void Ortho_GUI::CheckModel()
 {
-
-   //Service<ModelServices> pModel;
-
-
    ProgressResource pProgress("ProgressBar");
 
    RasterDataDescriptor* pDesc = static_cast<RasterDataDescriptor*>(pCube->getDataDescriptor());
@@ -287,7 +334,6 @@ void Ortho_GUI::CheckModel()
 
     Service<ModelServices> pModel;
 	std::vector<DataElement*> pGcpLists = pModel->getElements(pCube, TypeConverter::toString<GcpList>());
-
 
     if (!pGcpLists.empty())
 	{
@@ -317,7 +363,6 @@ void Ortho_GUI::CheckModel()
 
                pProgress->updateProgress(msg, 0, ERRORS);
 
-
                return;
             }
          }
@@ -326,14 +371,13 @@ void Ortho_GUI::CheckModel()
   	
 	// UPDATE GCPs HEIGHT INFORMATION AND SWITCH Lat&Lon COORDINATE FOR CORRECT VISUALIZAZION IN THE GCPs EDITOR
  
- 
     std::list<GcpPoint> Punti = GCPs->getSelectedPoints();
      
 	Punti = Metadata.UpdateGCP(Punti, image_path);
 
 	SAR_Model ModProva(Metadata,100);
 
-	COORD Punto;
+	P_COORD Punto;
 	int N=Punti.size();
 	int n=0;
 	double Lat, Lon;
@@ -396,8 +440,89 @@ void Ortho_GUI::CheckModel()
 				  						                      
 		pProgress->updateProgress(msg, 100, NORMAL);
 
+     //	pStep->finalize(); 
+}
 
-//	pStep->finalize(); 
+void Ortho_GUI::ComputeGrid()
+{
+   // Compute grid information
+
+   ofstream output;
+   output.open("prova_grid.txt");
+   output.precision(10);
+   
+   int n = Metadata.CornerCoordinate.size();
+
+   vector<double> Latitude, Longitude, Nord, East;
+   vector<LatLonPoint> Corner;
+   vector<UtmPoint> CornerUTM;
+   string Lat, Lon;
+   Corner.resize(n);
+   CornerUTM.reserve(n);
+   Latitude.resize(n);
+   Longitude.resize(n);
+   Nord.resize(n);
+   East.resize(n);
+
+   for (int i=0;i<n;i++)
+   {
+	   Lat = boost::lexical_cast<string>(Metadata.CornerCoordinate[i].Latitude);
+       Lon = boost::lexical_cast<string>(Metadata.CornerCoordinate[i].Longitude);  
+	   Latitude[i] = Metadata.CornerCoordinate[i].Latitude;
+	   Longitude[i] = Metadata.CornerCoordinate[i].Longitude;
+
+	   output<<Lat<<" "<<Lon<<endl;
+
+	   Corner[i] = LatLonPoint(Lat,Lon);
+	   CornerUTM[i] = UtmPoint(Corner[i]);
+	   East[i]=CornerUTM[i].getEasting();
+	   Nord[i]=CornerUTM[i].getNorthing();
+	   
+	   output<<Nord[i]<<" "<<East[i]<<endl;
+
+   }
+
+   vector<double>::iterator index;
+   index = min_element(East.begin(),East.end());
+   double Min_East = East.at(distance(East.begin(),index));
+   double Min_Lon = Longitude.at(distance(East.begin(),index));
+
+   OrthoGrid.hemisphere = CornerUTM[distance(East.begin(),index)].getHemisphere();
+   OrthoGrid.iZone = CornerUTM[distance(East.begin(),index)].getZone();
+   
+   index = max_element(East.begin(),East.end());
+   double Max_East = East.at(distance(East.begin(),index)); 
+   double Max_Lon = Longitude.at(distance(East.begin(),index)); 
+   
+   index = min_element(Nord.begin(),Nord.end());
+   double Min_Nord = Nord.at(distance(Nord.begin(),index));
+   double Min_Lat = Latitude.at(distance(Nord.begin(),index));
+
+   index = max_element(Nord.begin(),Nord.end());
+   double Max_Nord = Nord.at(distance(Nord.begin(),index));
+   double Max_Lat = Latitude.at(distance(Nord.begin(),index));
 
 
+   output<<endl;
+   output<<Min_East<<"	"<<Max_East<<"	"<<Max_East-Min_East<<endl;
+   output<<Min_Nord<<"	"<<Max_Nord<<"	"<<Max_Nord-Min_Nord<<endl;	
+
+   OrthoGrid.X_Min = Min_East;
+   OrthoGrid.Y_Min = Min_Nord;
+   OrthoGrid.X_Max = Max_East;
+   OrthoGrid.Y_Max = Max_Nord;
+   OrthoGrid.X_Dim = (Max_East-Min_East);
+   OrthoGrid.Y_Dim = (Max_Nord-Min_Nord);
+
+   X_Spacing->setValue(OrthoGrid.X_Dim/Metadata.Width);
+   Y_Spacing->setValue(OrthoGrid.Y_Dim/Metadata.Height);   
+   OrthoGrid.X_Step = X_Spacing->value();
+   OrthoGrid.Y_Step = Y_Spacing->value();
+
+   OrthoGrid.Lon_Min = Min_Lon;
+   OrthoGrid.Lat_Min = Min_Lat;
+   OrthoGrid.Lon_Max = Max_Lon;
+   OrthoGrid.Lat_Max = Max_Lat;
+
+   output.close();
 }

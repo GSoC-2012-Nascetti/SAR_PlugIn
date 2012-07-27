@@ -10,17 +10,18 @@
 #ifndef ORTHO_GUI_H
 #define ORTHO_GUI_H
 
+#include "DockWindow.h"
+#include "Layer.h"
+#include "Orthorectification.h"
+#include "PlotWidget.h"
+#include "RasterElement.h"
+#include "SAR_Model.h"
+#include "TerraSAR_Metadata.h"
+
 #include <QtGui/QAction>
 #include <QtGui/QDialog>
 #include <QtGui/QGroupBox>
 #include <QtGui/QRadioButton>
-#include "PlotWidget.h"
-#include "DockWindow.h"
-#include "Layer.h"
-#include "TerraSAR_Metadata.h"
-#include "RasterElement.h"
-#include "SAR_Model.h"
-
 
 class QComboBox;
 class QDoubleSpinBox;
@@ -39,12 +40,14 @@ public slots:
    void StartOrtho();
    void CheckImage();
    void CheckModel();
+   void ComputeGrid();
 
 private:
 	
    TerraSAR_Metadata Metadata;
    SAR_Model *Model;
    RasterElement *pCube;
+   GRID OrthoGrid;
 
    Ortho_GUI(const Ortho_GUI& rhs);
    Ortho_GUI& operator=(const Ortho_GUI& rhs);
