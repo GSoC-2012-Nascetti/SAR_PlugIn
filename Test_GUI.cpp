@@ -7,8 +7,8 @@
 * http://www.gnu.org/licenses/lgpl.html
 */
 
-#include <QtGui\QApplication>
-#include <QtGui\QMessageBox>
+#include <QtGui/QApplication>
+#include <QtGui/QMessageBox>
 
 
 #include "DesktopServices.h"

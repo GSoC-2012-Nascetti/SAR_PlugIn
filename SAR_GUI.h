@@ -31,8 +31,8 @@ public:
 	std::string prova,name_left,name_right;
 
 protected:
-	void SAR_GUI::mousePressEvent(QMouseEvent *event);
-	bool SAR_GUI::eventFilter(QObject* pObject, QEvent* pEvent);
+	void mousePressEvent(QMouseEvent *event);
+	bool eventFilter(QObject* pObject, QEvent* pEvent);
 
 public slots:
 

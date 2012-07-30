@@ -30,7 +30,7 @@ public:
 	bool ReadFile(std::string);
 	void UpdateMetadata(DynamicObject*);
 	std::list<GcpPoint> UpdateGCP(std::list<GcpPoint>, std::string, Progress *pProgress);
-	std::list<GcpPoint> TerraSAR_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path);
+	std::list<GcpPoint> UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path);
 
 	// ANNOTATION CORRECTION //
 	double RangeCoeff1,RangeCoeff2,AzimuthCoeff;
