@@ -319,7 +319,7 @@ COORD_Ecef Stereo_SAR_Model::Stereo_SAR_SlantToGround(double Left_I,double Left_
     
 	Point.Longitude =atan(Point.Y_Ecef/Point.X_Ecef);
     
-	if (Point.Longitude < 0)
+	if (Point.Longitude < 0.0)
 	{
 		Point.Longitude += 2.0*Pi_Greco;
 	}
@@ -349,9 +349,11 @@ COORD_Ecef Stereo_SAR_Model::Stereo_SAR_SlantToGround(double Left_I,double Left_
 		  avvero=1;	
 	  }    
 	}
-        
+    
 	Point.Longitude =(Point.Longitude/Pi_Greco)*180.0 ;
     Point.Latitude =(Point.Latitude/Pi_Greco)*180.0;
+
+	if (Point.Y_Ecef < 0.0) Point.Longitude = Point.Longitude - 180;
 		
 	return Point;
 }
