@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <vector>
 #include <cstdlib>
+#include "GcpList.h"
 
 using namespace std;
 
@@ -70,6 +71,15 @@ public:
 
 	// STATE VECTORS INFORMATION //
 	int NumStateVectors;
-	std::vector<STATEVECTOR> StateVectors; //controllare static?????
+	std::vector<STATEVECTOR> StateVectors; 
+
+	virtual bool ReadFile(std::string) 
+	{ return true;}
+
+	virtual void UpdateMetadata(DynamicObject*)
+	{ return;}
+
+	virtual std::list<GcpPoint> UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path)
+	{ return PuntiGCPs;}
 
 };

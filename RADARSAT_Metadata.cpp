@@ -9,6 +9,7 @@
 
 #include "AppVerify.h"
 #include "Progress.h"
+#include "ProgressResource.h"
 #include "RADARSAT_Metadata.h"
 #include "stdlib.h"
 #include "sstream"
@@ -149,26 +150,47 @@ bool RADARSAT_Metadata::ReadFile(std::string path)
 	C4 = Nx*Ny;
 
 	// RETRIVE CORNER COORDINATE //
+	CornerCoordinate.resize(4);
 
 	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[1]/imageCoordinate/pixel/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-	CornerCoordinate[1].J = static_cast<int>(pResult->getNumberValue());
+	CornerCoordinate[0].J = static_cast<int>(pResult->getNumberValue());
 	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[1]/imageCoordinate/line/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-	CornerCoordinate[1].I = static_cast<int>(pResult->getNumberValue());
+	CornerCoordinate[0].I = static_cast<int>(pResult->getNumberValue());
 	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[1]/geodeticCoordinate/latitude/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-	CornerCoordinate[1].Latitude = static_cast<double>(pResult->getNumberValue());
+	CornerCoordinate[0].Latitude = static_cast<double>(pResult->getNumberValue());
 	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[1]/geodeticCoordinate/longitude/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-	CornerCoordinate[1].Longitude = static_cast<double>(pResult->getNumberValue());
+	CornerCoordinate[0].Longitude = static_cast<double>(pResult->getNumberValue());
 	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint[1]/geodeticCoordinate/height/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-	CornerCoordinate[1].Height = static_cast<double>(pResult->getNumberValue());	
+	CornerCoordinate[0].Height = static_cast<double>(pResult->getNumberValue());	
 
 	index.str(string());
 	index.clear();
 	index<<C2;
+
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/pixel/text())", DefaultNamespace,
+						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+	CornerCoordinate[1].J = static_cast<int>(pResult->getNumberValue());
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/line/text())", DefaultNamespace,
+						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+	CornerCoordinate[1].I = static_cast<int>(pResult->getNumberValue());
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/latitude/text())", DefaultNamespace,
+						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+	CornerCoordinate[1].Latitude = static_cast<double>(pResult->getNumberValue());
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/longitude/text())", DefaultNamespace,
+						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+	CornerCoordinate[1].Longitude = static_cast<double>(pResult->getNumberValue());
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/height/text())", DefaultNamespace,
+						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+	CornerCoordinate[1].Height = static_cast<double>(pResult->getNumberValue());
+
+	index.str(string());
+    index.clear();
+	index<<C3;
 
 	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/pixel/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
@@ -179,16 +201,16 @@ bool RADARSAT_Metadata::ReadFile(std::string path)
 	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/latitude/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[2].Latitude = static_cast<double>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/longitude/text())", DefaultNamespace,
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/longitude/text())", DefaultNamespace, 
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[2].Longitude = static_cast<double>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/height/text())", DefaultNamespace,
+	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/height/text())", DefaultNamespace, 
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[2].Height = static_cast<double>(pResult->getNumberValue());
 
 	index.str(string());
     index.clear();
-	index<<C3;
+	index<<C4;
 
 	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/pixel/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
@@ -199,32 +221,12 @@ bool RADARSAT_Metadata::ReadFile(std::string path)
 	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/latitude/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[3].Latitude = static_cast<double>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/longitude/text())", DefaultNamespace, 
-						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-	CornerCoordinate[3].Longitude = static_cast<double>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/height/text())", DefaultNamespace, 
-						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-	CornerCoordinate[3].Height = static_cast<double>(pResult->getNumberValue());
-
-	index.str(string());
-    index.clear();
-	index<<C4;
-
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/pixel/text())", DefaultNamespace,
-						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-	CornerCoordinate[4].J = static_cast<int>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/imageCoordinate/line/text())", DefaultNamespace,
-						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-	CornerCoordinate[4].I = static_cast<int>(pResult->getNumberValue());
-	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/latitude/text())", DefaultNamespace,
-						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-	CornerCoordinate[4].Latitude = static_cast<double>(pResult->getNumberValue());
 	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/longitude/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-	CornerCoordinate[4].Longitude = static_cast<double>(pResult->getNumberValue());
+	CornerCoordinate[3].Longitude = static_cast<double>(pResult->getNumberValue());
 	pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+index.str()+"]/geodeticCoordinate/height/text())", DefaultNamespace,
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-	CornerCoordinate[4].Height = static_cast<double>(pResult->getNumberValue());
+	CornerCoordinate[3].Height = static_cast<double>(pResult->getNumberValue());
 
 	// RETRIVE ORBIT STATE VECTORS //
 
@@ -298,7 +300,7 @@ void RADARSAT_Metadata::UpdateMetadata(DynamicObject* DynamicMetadata)
 	// UPDATE CORNER COORDINATE //
 	std::string current;
 
-    for (int n=1; n<5; n++ )
+    for (int n=0; n<4; n++ )
 	{
 		std::stringstream num;
 		num<<n;
@@ -340,6 +342,53 @@ void RADARSAT_Metadata::UpdateMetadata(DynamicObject* DynamicMetadata)
 
 std::list<GcpPoint> RADARSAT_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path, Progress *pProgress)
 {
+	int N=0;
+	N = PuntiGCPs.size();
+
+	std::string DefaultNamespace = "http://www.rsi.ca/rs2/prod/xml/schemas";
+
+	XmlReaderSAR xml(Service<MessageLogMgr>()->getLog(), false);
+	
+	if (path.empty() || xml.parse(path) == NULL)
+	{
+      return PuntiGCPs;
+	}
+
+	list<GcpPoint>::iterator pList;	
+
+	std::string current;
+	XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* pResult;
+
+	int n=1;
+
+	for (pList = PuntiGCPs.begin(); pList != PuntiGCPs.end(); pList++)
+	{
+		std::stringstream num;
+		num<<n;              
+		current = "xs:double(//geolocationGrid/imageTiePoint["+num.str()+"]/geodeticCoordinate/height/text())";
+		pResult = xml.queryNamespace(current,DefaultNamespace, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		pList->mCoordinate.mZ = static_cast<double>(pResult->getNumberValue());	
+	    
+	    pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+num.str()+"]/geodeticCoordinate/latitude/text())", DefaultNamespace,
+						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		pList->mCoordinate.mY = static_cast<double>(pResult->getNumberValue());
+	    
+		pResult = xml.queryNamespace("xs:double(//geolocationGrid/imageTiePoint["+num.str()+"]/geodeticCoordinate/longitude/text())", DefaultNamespace,
+						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+	    pList->mCoordinate.mX = static_cast<double>(pResult->getNumberValue());
+		
+		pProgress->updateProgress("Update GCPs Information",int(100*n/N), NORMAL);		
+		n++;
+
+	}
+
+	return PuntiGCPs;
+}
+
+std::list<GcpPoint> RADARSAT_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path)
+{
+	ProgressResource pProgress("ProgressBar");
+
 	int N=0;
 	N = PuntiGCPs.size();
 

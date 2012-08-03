@@ -14,7 +14,6 @@
 
 #include <iostream>
 #include <fstream>
-using namespace std;
 
 #include "boost/numeric/ublas/lu.hpp"
 #include "boost/numeric/ublas/matrix.hpp"
@@ -22,6 +21,7 @@ using namespace std;
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
+using namespace std;
 using namespace boost::numeric::ublas;
 
 
