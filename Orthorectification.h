@@ -41,7 +41,18 @@ struct GRID
 	int iZone;
 	char hemisphere;
 
+	double nodatavalue;
+
 };
+
+/*
+enum ResamplingMethod
+{
+	NEAREST_NEIGHBOR=0,
+	AVERAGEBOX3,
+	AVERAGEBOX5,
+	AVERAGEBOX7
+};*/
 
 class Orthorectification : public ExecutableShell
 {
@@ -56,16 +67,18 @@ public:
 
 	virtual bool getInputSpecification(PlugInArgList*& pInArgList);
     virtual bool getOutputSpecification(PlugInArgList*& pOutArgList);
-    virtual bool execute();
+    virtual bool execute(int type);
 	virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+	virtual bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, double Geoid_Offset);
 	
 private:
 
 	RasterElement *Image;
 
+	int res_type,boxsize;
+
 	double FlatHeight;
 	// GRID EXTENSION 
-
 
     GRID OrthoGrid;
 };

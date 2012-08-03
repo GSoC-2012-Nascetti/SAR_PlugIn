@@ -21,6 +21,7 @@
 #include "PlugInResource.h"
 #include "Progress.h"
 #include "ProgressResource.h"
+#include "RADARSAT_Metadata.h"
 #include "RasterDataDescriptor.h"
 #include "StringUtilities.h"
 #include "UtilityServices.h"
@@ -46,17 +47,21 @@
 #include "boost/accumulators/statistics/mean.hpp"
 #include "boost/accumulators/statistics/variance.hpp"
 #include "boost/lexical_cast.hpp"
+#include "boost/tokenizer.hpp"
 
 #include <vector>
 #include <algorithm>
 #include <iostream>
 #include <fstream>
 
+
 using namespace std;
 
 using namespace boost::accumulators;
 
-Ortho_GUI::Ortho_GUI( QWidget* pParent, const char* pName, bool modal )
+using namespace boost;
+
+Ortho_GUI::Ortho_GUI( QWidget* pParent, const char* pName, bool modal,int sensor_type)
 : QDialog(pParent)
 {
 	if (pName == NULL)
@@ -175,6 +180,19 @@ Ortho_GUI::Ortho_GUI( QWidget* pParent, const char* pName, bool modal )
    VERIFYNRV(connect(mpFlatten, SIGNAL(toggled(bool)), box3, SLOT(setEnabled(bool))));
    VERIFYNRV(connect(mpDsm, SIGNAL(toggled(bool)), box4, SLOT(setEnabled(bool))));
 
+   //select sensor type 
+
+   if (sensor_type ==0)
+   {
+	   Metadata = new TerraSAR_Metadata();
+	   sensor_name = "TerraSAR-X";
+   }
+   if (sensor_type ==1) 
+   {
+	   Metadata = new RADARSAT_Metadata();
+	   sensor_name = "RADARSAT-2";
+   }
+
    init();
 
 }
@@ -188,14 +206,28 @@ void Ortho_GUI::init()
    Service<ModelServices> pModel;
    mCubeNames = pModel->getElementNames("RasterElement");
 
+   int ii =0;
    for (unsigned int i = 0; i < mCubeNames.size(); i++)
    {
       mpImageListCombo->insertItem(i, QString::fromStdString(mCubeNames[i]));
-	  mpDSMListCombo->insertItem(i, QString::fromStdString(mCubeNames[i]));
+	  
+	  size_t pos;
+	  std::string file_ext;
+	  pos = mCubeNames[i].find_last_of(".");
+	  file_ext = mCubeNames[i].substr(pos);
+  
+	  if (file_ext.compare(".asc") ==0) 
+	  {
+		  mpDSMListCombo->insertItem(ii, QString::fromStdString(mCubeNames[i]));	
+		  ii++;
+	  }
+
    }
 
    mpInterpolationList->insertItem(0,QString::fromStdString("Nearest Neighbor Interpolation"));
-   mpInterpolationList->insertItem(1,QString::fromStdString("Bilinear Interpolation"));
+   mpInterpolationList->insertItem(1,QString::fromStdString("Box Average 3x3"));
+   mpInterpolationList->insertItem(2,QString::fromStdString("Box Average 5x5"));
+   mpInterpolationList->insertItem(3,QString::fromStdString("Box Average 7x7"));
 
    X_Spacing->setMinimum(0);
    X_Spacing->setDecimals(3);
@@ -218,6 +250,7 @@ void Ortho_GUI::init()
    box3->setEnabled(false);
    box4->setEnabled(false);
    mpStartOrtho->setEnabled(false);
+
 }
 
 void Ortho_GUI::StartOrtho()
@@ -247,17 +280,40 @@ void Ortho_GUI::StartOrtho()
 
 	// RETRIEVE & UPDATE METADATA INFORMATION //
 
-	bool control = Metadata.ReadFile(image_path);
+	bool control = Metadata->ReadFile(image_path);
 
-	Metadata.UpdateMetadata(oMetadata); 
+	Metadata->UpdateMetadata(oMetadata); 
 
 	SAR_Model *ModProva;
 		
-	ModProva = new SAR_Model(Metadata,100);
+	ModProva = new SAR_Model(*Metadata,10);
 
 	Orthorectification ProcessOrtho(pCube, ModProva, OrthoGrid, Height->value());
 
-	ProcessOrtho.execute();
+	// RETRIVE SELECTED RESAMPLING METHOD AND EXECUTE ORTHO
+
+	int indexR = mpInterpolationList->currentIndex();
+	
+	if (mpFlatten->isChecked() ==true) 
+	{
+		
+/*	switch (indexR)
+	{
+	case 0: ProcessOrtho.execute(NEAREST_NEIGHBOR);
+	case 3: ProcessOrtho.execute(AVERAGEBOX7);
+	
+	} */
+
+	ProcessOrtho.execute(indexR);
+	}
+	else 
+	{
+		VERIFYNRV(RetrieveDSMGrid());
+
+		bool control = ProcessOrtho.execute(indexR, pDSM, DSMGrid, GeoidOffSet->value());
+
+	}
+
 
 }
 
@@ -286,13 +342,13 @@ void Ortho_GUI::CheckImage()
    pCube =  dynamic_cast<RasterElement*>(pModel->getElement(image_name,"",NULL ));
 
    image_path =  pCube->getFilename();
-
-   bool control = Metadata.ReadFile(image_path);
+ 
+   bool control = Metadata->ReadFile(image_path);
 
    if (control == false)
    { 
 	   QMessageBox::information(this, QString::fromStdString("Error Information"), 
-		                        QString::fromStdString("This is not a TerraSAR-X imagery") );
+		                        QString::fromStdString("This is not a "+sensor_name+" SLC standard product") );
 	   return;	
    }
 
@@ -305,7 +361,7 @@ void Ortho_GUI::CheckImage()
 
    mpImageListCombo->setEnabled(false);
 
-   Height->setValue(Metadata.CornerCoordinate[0].Height);
+   Height->setValue(Metadata->CornerCoordinate[0].Height);
 
    ComputeGrid();
 }
@@ -325,9 +381,9 @@ void Ortho_GUI::CheckModel()
 
 	// RETRIEVE & UPDATE METADATA INFORMATION //
 
-	bool control = Metadata.ReadFile(image_path);
+	bool control = Metadata->ReadFile(image_path);
 
-	Metadata.UpdateMetadata(oMetadata); 
+	Metadata->UpdateMetadata(oMetadata); 
   
 	// WIDGET SELECT & RETRIEVE GCPs INFORMATION  //
 	GcpList * GCPs = NULL;
@@ -373,9 +429,9 @@ void Ortho_GUI::CheckModel()
  
     std::list<GcpPoint> Punti = GCPs->getSelectedPoints();
      
-	Punti = Metadata.UpdateGCP(Punti, image_path);
+	Punti = Metadata->UpdateGCP(Punti, image_path);
 
-	SAR_Model ModProva(Metadata,100);
+	SAR_Model ModProva(*Metadata,100);
 
 	P_COORD Punto;
 	int N=Punti.size();
@@ -387,7 +443,7 @@ void Ortho_GUI::CheckModel()
 	list<GcpPoint>::iterator pList;
 	for (pList = Punti.begin(); pList != Punti.end(); pList++)
 	{
-		if(pList->mPixel.mX<Metadata.Width && pList->mPixel.mY<Metadata.Height)	
+		if(pList->mPixel.mX<Metadata->Width && pList->mPixel.mY<Metadata->Height)	
 		{
 			Lon = pList->mCoordinate.mX;
 			Lat = pList->mCoordinate.mY;
@@ -451,7 +507,9 @@ void Ortho_GUI::ComputeGrid()
    output.open("prova_grid.txt");
    output.precision(10);
    
-   int n = Metadata.CornerCoordinate.size();
+   int n = Metadata->CornerCoordinate.size();
+
+   output<<"Numero corner "<<n<<endl;
 
    vector<double> Latitude, Longitude, Nord, East;
    vector<LatLonPoint> Corner;
@@ -466,10 +524,10 @@ void Ortho_GUI::ComputeGrid()
 
    for (int i=0;i<n;i++)
    {
-	   Lat = boost::lexical_cast<string>(Metadata.CornerCoordinate[i].Latitude);
-       Lon = boost::lexical_cast<string>(Metadata.CornerCoordinate[i].Longitude);  
-	   Latitude[i] = Metadata.CornerCoordinate[i].Latitude;
-	   Longitude[i] = Metadata.CornerCoordinate[i].Longitude;
+	   Lat = boost::lexical_cast<string>(Metadata->CornerCoordinate[i].Latitude);
+       Lon = boost::lexical_cast<string>(Metadata->CornerCoordinate[i].Longitude);  
+	   Latitude[i] = Metadata->CornerCoordinate[i].Latitude;
+	   Longitude[i] = Metadata->CornerCoordinate[i].Longitude;
 
 	   output<<Lat<<" "<<Lon<<endl;
 
@@ -514,8 +572,8 @@ void Ortho_GUI::ComputeGrid()
    OrthoGrid.X_Dim = (Max_East-Min_East);
    OrthoGrid.Y_Dim = (Max_Nord-Min_Nord);
 
-   X_Spacing->setValue(OrthoGrid.X_Dim/Metadata.Width);
-   Y_Spacing->setValue(OrthoGrid.Y_Dim/Metadata.Height);   
+   X_Spacing->setValue(OrthoGrid.X_Dim/Metadata->Width);
+   Y_Spacing->setValue(OrthoGrid.Y_Dim/Metadata->Height);   
    OrthoGrid.X_Step = X_Spacing->value();
    OrthoGrid.Y_Step = Y_Spacing->value();
 
@@ -525,4 +583,93 @@ void Ortho_GUI::ComputeGrid()
    OrthoGrid.Lat_Max = Max_Lat;
 
    output.close();
+}
+
+bool Ortho_GUI::RetrieveDSMGrid()
+{
+
+	// Retrieve DSMgrid information from asc file
+
+    ofstream output;
+    output.open("prova_dsm.txt");
+    output.precision(10);
+
+	Service<ModelServices> pModel;	
+	DSM_name = mCubeNames.at(mpDSMListCombo->currentIndex());
+	pDSM =  dynamic_cast<RasterElement*>(pModel->getElement(DSM_name,"",NULL ));
+	DSM_path =  pDSM->getFilename();
+
+	string line;
+	size_t pos;
+	ifstream fileDSM (DSM_path);
+
+	getline (fileDSM, line);
+	pos = line.find_last_of(" ");
+	line = line.substr(pos+1);
+	DSMGrid.X_Dim = atof(line.c_str());
+    output<<"n-cols "<< DSMGrid.Y_Dim<<endl;
+
+	getline (fileDSM, line);
+	pos = line.find_last_of(" ");
+	line = line.substr(pos+1);
+	DSMGrid.Y_Dim = atof(line.c_str());
+	output<<"n-rows "<< DSMGrid.Y_Dim<<endl;
+
+    getline (fileDSM, line);
+	pos = line.find_last_of(" ");
+	line = line.substr(pos+1);
+    DSMGrid.Lon_Min = atof(line.c_str());
+	output<<"Lon min "<< DSMGrid.Lon_Min<<endl;
+
+	getline (fileDSM, line);
+	pos = line.find_last_of(" ");
+	line = line.substr(pos+1);
+    DSMGrid.Lat_Min = atof(line.c_str());
+	output<<"Lat min "<< DSMGrid.Lat_Min<<endl;	
+
+	getline (fileDSM, line);
+	pos = line.find_last_of(" ");
+	line = line.substr(pos+1);
+	DSMGrid.Lon_Step = atof(line.c_str());
+	output<<"Lon Step "<< DSMGrid.Lon_Step<<endl;	
+	DSMGrid.Lat_Step = atof(line.c_str());
+	output<<"Lat Step "<< DSMGrid.Lat_Step<<endl;
+
+    getline (fileDSM, line);
+	pos = line.find_last_of(" ");
+	line = line.substr(pos+1);
+	DSMGrid.nodatavalue = atof(line.c_str());
+	output<<"NaN "<< DSMGrid.nodatavalue<<endl;	
+
+	output.close();
+
+	DSMGrid.Lat_Max = DSMGrid.Lat_Min + DSMGrid.Lat_Step*DSMGrid.Y_Dim;
+	DSMGrid.Lon_Max = DSMGrid.Lon_Min + DSMGrid.Lon_Step*DSMGrid.X_Dim;
+
+	//COMPARE DSM and IMAGE grid in order to verify if DSM covers all image data
+
+	std::string msg = ("The DSM does not cover the entire image. \n\n"
+		              "Geographical Image Extension:\n\n" 
+					  "Lat Min: " + StringUtilities::toDisplayString(DSMGrid.Lat_Min) + "\n"
+					  "Lat Max: " + StringUtilities::toDisplayString(DSMGrid.Lat_Max) + "\n"
+					  "Lon Min: " + StringUtilities::toDisplayString(DSMGrid.Lon_Min) + "\n"
+					  "Lon Max: " + StringUtilities::toDisplayString(DSMGrid.Lon_Max) + "\n");
+
+	if ((DSMGrid.Lat_Max < OrthoGrid.Lat_Max) || (DSMGrid.Lat_Min > OrthoGrid.Lat_Min)) 
+	{
+		QMessageBox::information(this, QString::fromStdString("Error Information"), 
+		               QString::fromStdString(msg));
+	    return false;
+	}
+	
+	if ((DSMGrid.Lon_Max < OrthoGrid.Lon_Max) || (DSMGrid.Lon_Min > OrthoGrid.Lon_Min)) 
+	{
+	    QMessageBox::information(this, QString::fromStdString("Error Information"), 
+		               QString::fromStdString(msg));
+	    return false;	
+	}
+
+
+	return true;
+
 }

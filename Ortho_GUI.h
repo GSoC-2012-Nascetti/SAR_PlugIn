@@ -32,7 +32,7 @@ class Ortho_GUI : public QDialog
     Q_OBJECT
 
 public:
-    Ortho_GUI( QWidget* pParent = 0, const char* pName = 0, bool modal = FALSE );
+    Ortho_GUI( QWidget* pParent = 0, const char* pName = 0, bool modal = FALSE,int sensor_type=0);
     ~Ortho_GUI();
 
 public slots:
@@ -41,13 +41,19 @@ public slots:
    void CheckImage();
    void CheckModel();
    void ComputeGrid();
+   bool RetrieveDSMGrid();
 
 private:
 	
-   TerraSAR_Metadata Metadata;
+  // TerraSAR_Metadata Metadata;
+   SAR_Metadata *Metadata;
+
    SAR_Model *Model;
+   
    RasterElement *pCube;
+   RasterElement *pDSM;
    GRID OrthoGrid;
+   GRID DSMGrid;
 
    Ortho_GUI(const Ortho_GUI& rhs);
    Ortho_GUI& operator=(const Ortho_GUI& rhs);
@@ -56,6 +62,9 @@ private:
 
    std::string image_path;
    std::string image_name;
+   std::string DSM_path;
+   std::string DSM_name;
+   std::string sensor_name;
 
    QPushButton* mpCancelButton;
    QPushButton* mpApplyButton;
