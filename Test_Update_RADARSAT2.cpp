@@ -63,7 +63,7 @@ Test_Update_RADARSAT2::Test_Update_RADARSAT2(void)
    setProductionStatus(false);
    setType("Sample");
    setSubtype("Statistics");
-   setMenuLocation("[SAR PlugIn]/Test Update RADARSAT2 Metadata");
+   setMenuLocation("[SAR PlugIn]/Orientation Model/Check RADARSAT2");
    setAbortSupported(true);
 }
 

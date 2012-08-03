@@ -64,7 +64,7 @@ Test_Update_TerraSAR::Test_Update_TerraSAR(void)
    setProductionStatus(false);
    setType("Sample");
    setSubtype("Statistics");
-   setMenuLocation("[SAR PlugIn]/Test Update TerraSAR Metadata");
+   setMenuLocation("[SAR PlugIn]/Orientation Model/Check TerraSAR-X");
    setAbortSupported(true);
 }
 
@@ -106,6 +106,7 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
    }
    Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
    RasterElement* pCube = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
+   
    if (pCube == NULL)
    {
       std::string msg = "A raster cube must be specified.";
