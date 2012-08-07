@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<rdf:RDF xmlns:aebl="urn:2008:03:aebl-syntax-ns#" xmlns:opticks="urn:2008:03:opticks-aebl-extension-ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  
+<rdf:Description rdf:about="urn:aebl:install-manifest">
+    
+    
+<aebl:id>SAR_Processing@extras.ballforge.net</aebl:id>
+    <aebl:name>SAR_PlugIn</aebl:name>
+    <aebl:version>1.0</aebl:version>
+    <aebl:type>2</aebl:type>
+    <aebl:description>SAR PlugIn: Geocoding and 3D stereo measurement.</aebl:description>
+    <aebl:creator>Andrea Nascetti</aebl:creator>
+    <aebl:licenseURL>aeb:///license/lgpl-2.1.txt</aebl:licenseURL>
+    <aebl:iconURL>aeb:///icon/SAR_icon.png</aebl:iconURL>
+ 
+    <aebl:homepageURL>https://opticks.ballforge.net</aebl:homepageURL>    
+
+    <aebl:targetApplication>
+      <rdf:Description>
+        <aebl:id>opticks@ballforge.net</aebl:id>
+        <aebl:minVersion>4.8.0</aebl:minVersion>
+        <aebl:maxVersion>4.8.*</aebl:maxVersion>
+      </rdf:Description>
+    </aebl:targetApplication>
+
+    <aebl:targetPlatform>win32-x86-msvc10.0-release</aebl:targetPlatform>
+    
+<aebl:targetPlatform>win32-x86-msvc10.0-debug</aebl:targetPlatform>
+    
+<aebl:targetPlatform>win64-x86-msvc10.0-debug</aebl:targetPlatform>
+
+    <aebl:targetPlatform>win64-x86-msvc10.0-release</aebl:targetPlatform>    
+
+    <opticks:helpEntry>
+	<rdf:Description>
+        <opticks:name>SAR PlugIn Help...</opticks:name>
+        <opticks:url>aeb:///Help/SAR_PlugIn/SAR_help.pdf</opticks:url>
+      	</rdf:Description>
+    </opticks:helpEntry>
+
+</rdf:Description>
+</rdf:RDF>
