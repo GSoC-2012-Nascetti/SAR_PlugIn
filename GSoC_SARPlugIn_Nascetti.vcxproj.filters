@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Moc Files\moc_Ortho_GUI.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moc Files\moc_Ortho_RADARSAT.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moc Files\moc_Ortho_TerraSAR.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moc Files\moc_SAR_GUI.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moc Files\moc_Test_GUI.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\xmlreaderSAR.cpp">
+      <Filter>Metadata Reader</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\RADARSAT_Metadata.cpp">
+      <Filter>Metadata Reader</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\SAR_Metadata.cpp">
+      <Filter>Metadata Reader</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\TerraSAR_Metadata.cpp">
+      <Filter>Metadata Reader</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\SAR_GUI.cpp">
+      <Filter>3D Stereo Measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Test_GUI.cpp">
+      <Filter>3D Stereo Measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Ortho_GUI.cpp">
+      <Filter>Orthorectification</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Ortho_RADARSAT.cpp">
+      <Filter>Orthorectification</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Ortho_TerraSAR.cpp">
+      <Filter>Orthorectification</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Orthorectification.cpp">
+      <Filter>Orthorectification</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\SAR_Model.cpp">
+      <Filter>SAR Orientation Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Stereo_SAR_Model.cpp">
+      <Filter>SAR Orientation Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Test_Update_RADARSAT2.cpp">
+      <Filter>SAR Orientation Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Test_Update_TerraSAR.cpp">
+      <Filter>SAR Orientation Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ModuleManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\xmlreaderSAR.h">
+      <Filter>Metadata Reader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\RADARSAT_Metadata.h">
+      <Filter>Metadata Reader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\SAR_Metadata.h">
+      <Filter>Metadata Reader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\TerraSAR_Metadata.h">
+      <Filter>Metadata Reader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Test_GUI.h">
+      <Filter>3D Stereo Measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\SAR_GUI.h">
+      <Filter>3D Stereo Measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Orthorectification.h">
+      <Filter>Orthorectification</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Ortho_GUI.h">
+      <Filter>Orthorectification</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Ortho_RADARSAT.h">
+      <Filter>Orthorectification</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Ortho_TerraSAR.h">
+      <Filter>Orthorectification</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Stereo_SAR_Model.h">
+      <Filter>SAR Orientation Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\SAR_Model.h">
+      <Filter>SAR Orientation Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Test_Update_TerraSAR.h">
+      <Filter>SAR Orientation Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Test_Update_RADARSAT2.h">
+      <Filter>SAR Orientation Model</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="SAR Orientation Model">
+      <UniqueIdentifier>{fd48f93d-5f54-44eb-83a5-f169f9c3cb37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Orthorectification">
+      <UniqueIdentifier>{68316376-485b-4908-a54f-2951ff3405cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Moc Files">
+      <UniqueIdentifier>{9cade11b-7428-44be-a333-f156fecd80f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3D Stereo Measurement">
+      <UniqueIdentifier>{7169cec7-44b7-48cc-8f00-a1f0f4522ad5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Metadata Reader">
+      <UniqueIdentifier>{17ae096f-82c8-4b61-b714-853de7620434}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
