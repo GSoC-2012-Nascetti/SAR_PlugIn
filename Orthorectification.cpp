@@ -1,28 +1,32 @@
-#include "Orthorectification.h"
+/*
+* The information in this file is
+* Copyright(c) 2012, Andrea Nascetti <andreanascetti@gmail.com>
+* and is subject to the terms and conditions of the
+* GNU Lesser General Public License Version 2.1
+* The license text is available from
+* http://www.gnu.org/licenses/lgpl.html
+*/
 
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 #include "DataElement.h"
-//#include "DataRequest.h"
 #include "DesktopServices.h"
-
 #include "GcpLayer.h"
 #include "GcpList.h"
+#include "MessageLogResource.h"
 #include "ModelServices.h"
-
-//#include "MessageLogResource.h"
-//#include "ObjectResource.h"
-//#include "PlugInArgList.h"
-//#include "PlugInManagerServices.h"
-//#include "PlugInRegistration.h"
-//#include "Progress.h"
-
+#include "Orthorectification.h"
+#include "PlugInArgList.h"
+#include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
+#include "Progress.h"
 #include "ProgressResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterUtilities.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
+#include "PlugInResource.h"
 #include "switchOnEncoding.h"
 
 #include <complex>
@@ -30,30 +34,40 @@
 #include <iostream>
 #include <fstream>
 
+double bilinear_height(DataAccessor pSrcAcc, double I, double J)
+   {
+
+	   double z1=0,z2=0,z3=0,z4=0;
+       pSrcAcc->toPixel(int(J),int(I));
+	   VERIFY(pSrcAcc.isValid());
+	   z1 = pSrcAcc->getColumnAsDouble();
+
+       pSrcAcc->toPixel(int(J)+1,int(I));
+	   VERIFY(pSrcAcc.isValid());
+	   z2 = pSrcAcc->getColumnAsDouble();
+
+       pSrcAcc->toPixel(int(J),int(I)+1);
+	   VERIFY(pSrcAcc.isValid());
+	   z3 = pSrcAcc->getColumnAsDouble();
+
+       pSrcAcc->toPixel(int(J)+1,int(I)+1);
+	   VERIFY(pSrcAcc.isValid());
+	   z4 = pSrcAcc->getColumnAsDouble();
+
+       double a=0,b=0,c=0,d=0;    
+
+	   d = z1;
+	   a = (z2-z1);
+	   b = (z3-z1);
+	   c = (z4+z1-z2-z3);
+	   
+	   double H = a*(J-int(J))+b*(I-int(I))+c*(I-int(I))*(J-int(J))+d; 
+
+	   return H;
+   }
 
 namespace
 {  
-   template<typename T> 
-   void copypixel(T* pData, DataAccessor pSrcAcc, int I, int J)
-   {
-	  double pixel;
-      pSrcAcc->toPixel(J,I);
-	  VERIFYNRV(pSrcAcc.isValid());
-      pixel = pSrcAcc->getColumnAsDouble();
-      *pData = static_cast<T>(pixel); 
-   }
-
-   template<typename T> 
-   void copyheight(T* pData, DataAccessor pSrcAcc, int I, int J, double &H)
-   {
-      double pixel=0;
-      pSrcAcc->toPixel(J,I);
-	  VERIFYNRV(pSrcAcc.isValid());
-      pixel = pSrcAcc->getColumnAsDouble();
-      H = (pixel); 
-   }
-
-
    template<typename T> 
    void copypixel3(T* pData, DataAccessor pSrcAcc, int I, int J, int boxsize)
    {
@@ -68,10 +82,7 @@ namespace
 
       *pData = static_cast<T>((pixel/((2*boxsize+1)*3.0))); 
    }
-
 };
-
-
 
 Orthorectification::Orthorectification(RasterElement *inputRaster, SAR_Model *inputModel,GRID inputGrid,double inputHeight)//,GRID *inputGrid,float *inputModel)
 {
@@ -103,11 +114,12 @@ bool Orthorectification::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
 
 bool Orthorectification::execute(int type)
 {
+	StepResource pStep("Orthorectification Process", "app", "B4D426EC-E06D-11E1-83C8-42E56088709B");
+	pStep->addStep("Start","app", "B4D426EC-E06D-11E1-83C8-42E56088709B");
+
 	boxsize=0;
-
 	res_type = type;
-
-
+	
 	if (res_type == 0) 
 	{
 		boxsize=0;	
@@ -125,28 +137,6 @@ bool Orthorectification::execute(int type)
 		boxsize=3;	
 	}
 
-/*	
-	switch ( res_type )
-	{
-	case 0:
-		{
-		boxsize=0;
-		}
-	case 1:
-		{
-		boxsize=1;
-		}
-	case 2:
-		{
-		boxsize=2;
-		}
-	case 3:
-		{
-		boxsize=3;
-		}
-	}
-	*/
-
     ProgressResource pResource("ProgressBar");
 
 	Progress *pProgress=pResource.get(); 
@@ -161,18 +151,48 @@ bool Orthorectification::execute(int type)
 	unsigned int N_Row = int(OrthoGrid.Y_Dim)+1;
 	unsigned int N_Col = int(OrthoGrid.X_Dim)+1;
 
-	ModelResource<RasterElement> pResultCube(RasterUtilities::createRasterElement(Image->getName()+"_Ortho",N_Row ,N_Col, FLT8BYTES));
+    // Check name of raster element //
+
+	Service<ModelServices> pModel;
+    vector<string> mCubeNames = pModel->getElementNames("RasterElement");
+
+	int NameIndex = 0, control=0;
+	stringstream out;
+	string OutputName=Image->getName();
+
+	string OutputName1 = OutputName.substr(0,OutputName.find_last_of("."));
+	while (control == 0)
+	{
+		control = 1;
+		OutputName = OutputName1+"_ortho_";
+		out << NameIndex;
+		OutputName.append(out.str()+".tiff");		
+		
+		for (unsigned int k=0; k<mCubeNames.size(); k++)
+		{
+		if (OutputName.compare(mCubeNames[k]) == 0) control = 0;
+		}
+
+		NameIndex++;
+		out.str("");
+		out.clear();
+
+	}
+
+	// Create output raster element and assoiciated descriptor and accessor //
+	
+	ModelResource<RasterElement> pResultCube(RasterUtilities::createRasterElement(OutputName,N_Row ,N_Col, FLT4BYTES));
 
 	RasterDataDescriptor* pResultDesc = static_cast<RasterDataDescriptor*> (pResultCube->getDataDescriptor());
 
-   FactoryResource<DataRequest> pResultRequest;
-   pResultRequest->setWritable(true);
-   DataAccessor pDestAcc = pResultCube->getDataAccessor(pResultRequest.release());
+    FactoryResource<DataRequest> pResultRequest;
+    pResultRequest->setWritable(true);
+    DataAccessor pDestAcc = pResultCube->getDataAccessor(pResultRequest.release());
 
-   double NodeLat, NodeLon;
+	double NodeLat, NodeLon;
 
-   for (unsigned int row = 0; row < N_Row; ++row)
-   {
+	for (unsigned int row = 0; row < N_Row; ++row)
+	{
 	  if (pProgress != NULL)
 	  {
       pProgress->updateProgress("Calculating result", row * 100 / N_Row, NORMAL);
@@ -181,7 +201,7 @@ bool Orthorectification::execute(int type)
 	  if (isAborted())
       {
          std::string msg = getName() + " has been aborted.";
-        // pStep->finalize(Message::Abort, msg);
+         pStep->finalize(Message::Abort, msg);
          if (pProgress != NULL)
          {
             pProgress->updateProgress(msg, 0, ABORT);
@@ -192,7 +212,8 @@ bool Orthorectification::execute(int type)
       if (!pDestAcc.isValid())
       {
          std::string msg = "Unable to access the cube data.";
-            pProgress->updateProgress(msg, 0, ERRORS);
+         pProgress->updateProgress(msg, 0, ERRORS);
+		 pStep->finalize(Message::Abort, msg);
          return false;
       }
 
@@ -207,101 +228,83 @@ bool Orthorectification::execute(int type)
 		  if ((NodeImage.I>1 && NodeImage.I< Model->Metadata.Width-1) && (NodeImage.J>1 && NodeImage.J< Model->Metadata.Height-1))
 		  {
 			switchOnEncoding(pResultDesc->getDataType(), copypixel3, pDestAcc->getColumn(), pSrcAcc, int(NodeImage.I), int(NodeImage.J),boxsize);	
-			//switchOnEncoding(pResultDesc->getDataType(), copypixel, pDestAcc->getColumn(), pSrcAcc, int(NodeImage.I), int(NodeImage.J));	
 		  }		  
 		  pDestAcc->nextColumn();
-      }
+	  }
 
       pDestAcc->nextRow();
-   }
+	}
 
-   Service<DesktopServices> pDesktop;
+	Service<DesktopServices> pDesktop;
 
-   Service<ModelServices> pMod;
+	Service<ModelServices> pMod;
 
-   GcpList* GcpL = static_cast<GcpList*>(pMod->createElement("corner coordinate","GcpList",pResultCube.get()));
+	GcpList* GcpL = static_cast<GcpList*>(pMod->createElement("corner coordinate","GcpList",pResultCube.get()));
    
-   // Update GCPs Information: to account for Opticks reading gcp lat&lon values the opposite way around, 
-   // here it is necessary to switch the value to assign lat to gcp.mCoordinate.mX  and lon to gcp.mCoordinate.mY 
+	// Update GCPs Information: to account for Opticks reading gcp lat&lon values the opposite way around, 
+	// here it is necessary to switch the value to assign lat to gcp.mCoordinate.mX  and lon to gcp.mCoordinate.mY 
 
-   GcpPoint Punto;
+	GcpPoint Punto;
 
-   Punto.mCoordinate.mX = OrthoGrid.Lat_Min;
-   Punto.mCoordinate.mY = OrthoGrid.Lon_Min;
-   Punto.mCoordinate.mZ = 0.0;
-   Punto.mPixel.mX = 0.0;
-   Punto.mPixel.mY = 0.0;
+	Punto.mCoordinate.mX = OrthoGrid.Lat_Min;
+	Punto.mCoordinate.mY = OrthoGrid.Lon_Min;
+	Punto.mCoordinate.mZ = 0.0;
+	Punto.mPixel.mX = 0.0;
+	Punto.mPixel.mY = 0.0;
 
-   GcpL->addPoint(Punto);
+	GcpL->addPoint(Punto);
 
-   Punto.mCoordinate.mX = OrthoGrid.Lat_Max;
-   Punto.mCoordinate.mY = OrthoGrid.Lon_Min;
-   Punto.mCoordinate.mZ = 0.0;
-   Punto.mPixel.mX = 0.0;
-   Punto.mPixel.mY = OrthoGrid.Y_Dim;
+	Punto.mCoordinate.mX = OrthoGrid.Lat_Max;
+	Punto.mCoordinate.mY = OrthoGrid.Lon_Min;
+	Punto.mCoordinate.mZ = 0.0;
+	Punto.mPixel.mX = 0.0;
+	Punto.mPixel.mY = OrthoGrid.Y_Dim;
    
-   GcpL->addPoint(Punto);
+	GcpL->addPoint(Punto);
 
-   Punto.mCoordinate.mX = OrthoGrid.Lat_Min;
-   Punto.mCoordinate.mY = OrthoGrid.Lon_Max;
-   Punto.mCoordinate.mZ = 0.0;
-   Punto.mPixel.mX = OrthoGrid.X_Dim;
-   Punto.mPixel.mY = 0.0;
+	Punto.mCoordinate.mX = OrthoGrid.Lat_Min;
+	Punto.mCoordinate.mY = OrthoGrid.Lon_Max;
+	Punto.mCoordinate.mZ = 0.0;
+	Punto.mPixel.mX = OrthoGrid.X_Dim;
+	Punto.mPixel.mY = 0.0;
    
-   GcpL->addPoint(Punto);
+	GcpL->addPoint(Punto);
 
-   Punto.mCoordinate.mX = OrthoGrid.Lat_Max;
-   Punto.mCoordinate.mY = OrthoGrid.Lon_Max;
-   Punto.mCoordinate.mZ = 0.0;
-   Punto.mPixel.mX = OrthoGrid.X_Dim;
-   Punto.mPixel.mY = OrthoGrid.Y_Dim;
+	Punto.mCoordinate.mX = OrthoGrid.Lat_Max;
+	Punto.mCoordinate.mY = OrthoGrid.Lon_Max;
+	Punto.mCoordinate.mZ = 0.0;
+	Punto.mPixel.mX = OrthoGrid.X_Dim;
+	Punto.mPixel.mY = OrthoGrid.Y_Dim;
    
-   GcpL->addPoint(Punto);
+	GcpL->addPoint(Punto);
 
-   SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(pDesktop->createWindow(pResultCube->getName(),
+	SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(pDesktop->createWindow(pResultCube->getName(),
          SPATIAL_DATA_WINDOW));
  
-   SpatialDataView* pView = (pWindow == NULL) ? NULL : pWindow->getSpatialDataView();  
+	SpatialDataView* pView = (pWindow == NULL) ? NULL : pWindow->getSpatialDataView();  
 
-   pView->setPrimaryRasterElement(pResultCube.get());
+	pView->setPrimaryRasterElement(pResultCube.get());
 
-   pView->createLayer(RASTER, pResultCube.get());
+	pView->createLayer(RASTER, pResultCube.get());
    
-   pView->createLayer(GCP_LAYER,GcpL,"GCP");
+	pView->createLayer(GCP_LAYER,GcpL,"GCP");
 
-   pView->setDataOrigin(LOWER_LEFT);
+	pView->setDataOrigin(LOWER_LEFT);
 
-   pResultCube.release();
+	pResultCube.release();
 
-   pProgress->updateProgress("Orthorectification is complete.", 100, NORMAL);
-   
-return true;
+	pProgress->updateProgress("Orthorectification is complete.", 100, NORMAL);
+	pStep->addStep("End","app", "B4D426EC-E06D-11E1-83C8-42E56088709B");
+    pStep->finalize();
+    
+	return true;
 
 }
 
-bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, double Geoid_Offset)
+bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, double Geoid_Offset, int DSM_resampling)
 {
-			ofstream output;
-        output.open("prova_dsm2.txt");
-        output.precision(10);
-
-		output<<"n-cols "<< DSMGrid.X_Dim<<endl;
-		output<<"n-rows "<< DSMGrid.Y_Dim<<endl;
-		output<<"Lon min "<< DSMGrid.Lon_Min<<endl;
-		output<<"Lat min "<< DSMGrid.Lat_Min<<endl;	
-		output<<"Lat Step "<< DSMGrid.Lat_Step<<endl;	
-		output<<"Lon Step "<< DSMGrid.Lon_Step<<endl;	
-		output<<"NaN "<< DSMGrid.nodatavalue<<endl;	
-		output<<endl;
-		output<<"n-cols "<< OrthoGrid.X_Dim<<endl;
-		output<<"n-rows "<< OrthoGrid.Y_Dim<<endl;
-		output<<"Lon min "<< OrthoGrid.Lon_Min<<endl;
-		output<<"Lat min "<< OrthoGrid.Lat_Min<<endl;	
-		output<<"Lat Step "<< OrthoGrid.Lat_Step<<endl;	
-		output<<"Lon Step "<< OrthoGrid.Lon_Step<<endl;	
-		output<<"NaN "<< OrthoGrid.nodatavalue<<endl;	
-
-
+	StepResource pStep("Orthorectification Process", "app", "B4D426EC-E06D-11E1-83C8-42E56088709B");
+	pStep->addStep("Start","app", "B4D426EC-E06D-11E1-83C8-42E56088709B");
 	boxsize=0;
 
 	res_type = type;
@@ -343,7 +346,37 @@ bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, do
 	unsigned int N_Row = int(OrthoGrid.Y_Dim)+1;
 	unsigned int N_Col = int(OrthoGrid.X_Dim)+1;
 
-	ModelResource<RasterElement> pResultCube(RasterUtilities::createRasterElement(Image->getName()+"_Ortho",N_Row ,N_Col, FLT4BYTES));
+	// Check name of raster element //
+	Service<ModelServices> pModel;
+    vector<string> mCubeNames = pModel->getElementNames("RasterElement");
+
+	int NameIndex = 0, control=0;
+	stringstream out;
+	string OutputName=Image->getName();
+	string OutputName1 = OutputName.substr(0,OutputName.find_last_of("."));
+
+	while (control == 0)
+	{
+		control = 1;
+		OutputName = OutputName1+"_ortho_";
+
+		out << NameIndex;
+		OutputName.append(out.str()+".tiff");		
+		
+		for (unsigned int k=0; k<mCubeNames.size(); k++)
+		{
+		if (OutputName.compare(mCubeNames[k]) == 0) control = 0;
+		}
+
+		NameIndex++;
+		out.str("");
+		out.clear();
+
+	}
+
+	// Create output raster element and assoiciated descriptor and accessor //
+	
+	ModelResource<RasterElement> pResultCube(RasterUtilities::createRasterElement(OutputName,N_Row ,N_Col, FLT4BYTES));
 
 	RasterDataDescriptor* pResultDesc = static_cast<RasterDataDescriptor*> (pResultCube->getDataDescriptor());
 
@@ -352,7 +385,7 @@ bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, do
     DataAccessor pDestAcc = pResultCube->getDataAccessor(pResultRequest.release());
 
     double NodeLat, NodeLon, H_IJ=0;
-	int DSM_I, DSM_J;
+	//int DSM_I, DSM_J;
 
     for (unsigned int row = 0; row < N_Row; ++row)
     {
@@ -364,7 +397,7 @@ bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, do
 	  if (isAborted())
       {
          std::string msg = getName() + " has been aborted.";
-        // pStep->finalize(Message::Abort, msg);
+         pStep->finalize(Message::Abort, msg);
          if (pProgress != NULL)
          {
             pProgress->updateProgress(msg, 0, ABORT);
@@ -375,7 +408,8 @@ bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, do
       if (!pDestAcc.isValid())
       {
          std::string msg = "Unable to access the cube data.";
-            pProgress->updateProgress(msg, 0, ERRORS);
+         pProgress->updateProgress(msg, 0, ERRORS);
+		 pStep->finalize(Message::Failure, msg);
          return false;
       }
 
@@ -385,30 +419,28 @@ bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, do
 		  NodeLat = OrthoGrid.Lat_Min+row*OrthoGrid.Lat_Step;
 		  NodeLon = OrthoGrid.Lon_Min+col*OrthoGrid.Lon_Step;
 
-		  // RETRIEVE HEIGHT VALUE FROM DSM
+		  // RETRIEVE HEIGHT VALUE FROM DSM 
 
-		  DSM_I = int((NodeLon - DSMGrid.Lon_Min)/DSMGrid.Lon_Step);
-		  DSM_J = pDescDSM->getRowCount() - int((NodeLat - DSMGrid.Lat_Min)/DSMGrid.Lat_Step);
-		  
-          output<<NodeLat<<" "<<NodeLon<<" "<< DSM_I<< " "<<DSM_J<<endl;
-		  
+		  if (DSM_resampling == 0) 
+		  {
+		  int DSM_I = int((NodeLon - DSMGrid.Lon_Min)/DSMGrid.Lon_Step);
+		  int DSM_J = pDescDSM->getRowCount() - int((NodeLat - DSMGrid.Lat_Min)/DSMGrid.Lat_Step);		  
           pDSMAcc->toPixel(DSM_J,DSM_I);
 	      VERIFY(pDSMAcc.isValid());
           H_IJ = (pDSMAcc->getColumnAsDouble());
-		  H_IJ = H_IJ+Geoid_Offset;
-/* 
-		//  pDSMAcc->toPixel(DSM_J,DSM_I);
+		  }
+		  else
+		  {
+		  double DSM_I = ((NodeLon - DSMGrid.Lon_Min)/DSMGrid.Lon_Step);
+		  double DSM_J = pDescDSM->getRowCount() - ((NodeLat - DSMGrid.Lat_Min)/DSMGrid.Lat_Step);
+		  H_IJ = bilinear_height(pDSMAcc,DSM_I,DSM_J);
+		  }
 
-		  switchOnEncoding(pResultDesc->getDataType(), copyheight,pDestAcc->getColumn(), pDSMAcc, DSM_I,DSM_J, H_IJ);
-*/
-		  output<<H_IJ<<endl;
-
-		  P_COORD NodeImage = Model->SAR_GroundToSlant(NodeLon,NodeLat,H_IJ);
+		  P_COORD NodeImage = Model->SAR_GroundToSlant(NodeLon,NodeLat,H_IJ+Geoid_Offset);
 
 		  if ((NodeImage.I>1 && NodeImage.I< Model->Metadata.Width-1) && (NodeImage.J>1 && NodeImage.J< Model->Metadata.Height-1))
 		  {
-			switchOnEncoding(pResultDesc->getDataType(), copypixel3, pDestAcc->getColumn(), pSrcAcc, int(NodeImage.I), int(NodeImage.J),boxsize);	
-			//switchOnEncoding(pResultDesc->getDataType(), copypixel, pDestAcc->getColumn(), pSrcAcc, int(NodeImage.I), int(NodeImage.J));	
+			switchOnEncoding(pResultDesc->getDataType(), copypixel3, pDestAcc->getColumn(), pSrcAcc, int(NodeImage.I), int(NodeImage.J),boxsize);		
 		  }		  
 		  pDestAcc->nextColumn();
       }
@@ -475,8 +507,8 @@ bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, do
    pResultCube.release();
 
    pProgress->updateProgress("Orthorectification is complete.", 100, NORMAL);
-     
-   output.close();
+   pStep->addStep("End","app", "B4D426EC-E06D-11E1-83C8-42E56088709B");
+   pStep->finalize();
 
    return true;
    

@@ -64,18 +64,33 @@ using namespace boost;
 Ortho_GUI::Ortho_GUI( QWidget* pParent, const char* pName, bool modal,int sensor_type)
 : QDialog(pParent)
 {
-	if (pName == NULL)
+
+   // Select sensor type //
+
+   if (sensor_type ==0)
    {
-      setObjectName( "TerraSAR-X Orthorectification" );
+	   Metadata = new TerraSAR_Metadata();
+	   sensor_name = "TerraSAR-X";
+   }
+   if (sensor_type ==1) 
+   {
+	   Metadata = new RADARSAT_Metadata();
+	   sensor_name = "RADARSAT-2";
+   }
+
+   if (pName == NULL)
+   {
+      setObjectName(QString::fromStdString(sensor_name+" Orthorectification"));
    }
    setModal( FALSE );
-   setWindowTitle("Orthorectification TerraSAR-X imagery");
+   setWindowTitle(QString::fromStdString("Orthorectification "+sensor_name+" imagery"));
 
-   // GUI widget object initialitation
+   // GUI widget object initialitation //
 
    mpImageListCombo = new QComboBox( this );
    mpDSMListCombo = new QComboBox( this );
    mpInterpolationList = new QComboBox( this );
+   mpDSMInterpolationList = new QComboBox( this );
 
    mpImageListCombo->setFixedSize(400,20);
    mpDSMListCombo->setFixedSize(300,20);
@@ -102,11 +117,11 @@ Ortho_GUI::Ortho_GUI( QWidget* pParent, const char* pName, bool modal,int sensor
    pOrthoModeGroup->addButton(mpFlatten);
    pOrthoModeGroup->addButton(mpDsm);
 
-   // GUI Layout Design
+   // GUI Layout Design //
    
    QGridLayout* MainLayout = new QGridLayout(this);
    
-   //Input Image group box    
+   // Input Image group box //
    QGridLayout* pLayout1 = new QGridLayout();
 
    pLayout1->addWidget(mpImageListCombo,0,0,1,3);
@@ -119,7 +134,7 @@ Ortho_GUI::Ortho_GUI( QWidget* pParent, const char* pName, bool modal,int sensor
    box1->setLayout(pLayout1);
    MainLayout->addWidget( box1, 0, 0,3,3);
    
-   // Datum & Projection Group Box
+   // Datum & Projection Group Box //
    QLabel *Project = new QLabel("Default Projection: UTM");
    QLabel *unitX = new QLabel("Meters");
    QLabel *unitY = new QLabel("Meters");
@@ -153,22 +168,25 @@ Ortho_GUI::Ortho_GUI( QWidget* pParent, const char* pName, bool modal,int sensor
    // Input DSM GroupBox
    QLabel *Lgeoid = new QLabel("Insert Geoid Offset:");
    QLabel *Ldsm = new QLabel("Select Input DSM:");
+   DSMResampling = new QLabel( "DSM Resampling Method", this );
    QGridLayout* pLayout4 = new QGridLayout();
    pLayout4->addWidget(Ldsm,0,0);
    pLayout4->addWidget(mpDSMListCombo,0,1,1,2);
-   pLayout4->addWidget(Lgeoid,1,1);
-   pLayout4->addWidget(GeoidOffSet,1,2);
+   pLayout4->addWidget(DSMResampling,1,0);
+   pLayout4->addWidget(mpDSMInterpolationList,1,1,1,2);
+   pLayout4->addWidget(Lgeoid,2,1);
+   pLayout4->addWidget(GeoidOffSet,2,2);
 
    box4 = new QGroupBox();
    box4->setLayout(pLayout4);
-   MainLayout->addWidget( box4, 6, 0,2,3);
+   MainLayout->addWidget( box4, 6, 0,3,3);
 
    // Button 
 
    MainLayout->addWidget(mpFlatten,3,0);
    MainLayout->addWidget(mpDsm,5,0);
-   MainLayout->addWidget( mpCancelButton, 7, 5);
-   MainLayout->addWidget( mpStartOrtho, 7, 4 );   
+   MainLayout->addWidget( mpCancelButton, 8, 5);
+   MainLayout->addWidget( mpStartOrtho, 8, 4 );   
 
    mpCancelButton->setText("Close");
    
@@ -179,19 +197,6 @@ Ortho_GUI::Ortho_GUI( QWidget* pParent, const char* pName, bool modal,int sensor
    VERIFYNRV(connect( mpStartOrtho, SIGNAL( clicked() ), this, SLOT( StartOrtho() )));
    VERIFYNRV(connect(mpFlatten, SIGNAL(toggled(bool)), box3, SLOT(setEnabled(bool))));
    VERIFYNRV(connect(mpDsm, SIGNAL(toggled(bool)), box4, SLOT(setEnabled(bool))));
-
-   //select sensor type 
-
-   if (sensor_type ==0)
-   {
-	   Metadata = new TerraSAR_Metadata();
-	   sensor_name = "TerraSAR-X";
-   }
-   if (sensor_type ==1) 
-   {
-	   Metadata = new RADARSAT_Metadata();
-	   sensor_name = "RADARSAT-2";
-   }
 
    init();
 
@@ -206,16 +211,16 @@ void Ortho_GUI::init()
    Service<ModelServices> pModel;
    mCubeNames = pModel->getElementNames("RasterElement");
 
-   int ii =0;
+   int ii=0;
    for (unsigned int i = 0; i < mCubeNames.size(); i++)
    {
-      mpImageListCombo->insertItem(i, QString::fromStdString(mCubeNames[i]));
-	  
 	  size_t pos;
-	  std::string file_ext;
+	  std::string file_ext;      	  
 	  pos = mCubeNames[i].find_last_of(".");
-	  file_ext = mCubeNames[i].substr(pos);
-  
+	  file_ext = mCubeNames[i].substr(pos);	  
+
+      mpImageListCombo->insertItem(i, QString::fromStdString(mCubeNames[i]));
+	
 	  if (file_ext.compare(".asc") ==0) 
 	  {
 		  mpDSMListCombo->insertItem(ii, QString::fromStdString(mCubeNames[i]));	
@@ -228,6 +233,10 @@ void Ortho_GUI::init()
    mpInterpolationList->insertItem(1,QString::fromStdString("Box Average 3x3"));
    mpInterpolationList->insertItem(2,QString::fromStdString("Box Average 5x5"));
    mpInterpolationList->insertItem(3,QString::fromStdString("Box Average 7x7"));
+
+   mpDSMInterpolationList->insertItem(0,QString::fromStdString("Nearest Neighbor Interpolation"));
+   mpDSMInterpolationList->insertItem(1,QString::fromStdString("Bilinear Interpolation"));
+   mpDSMInterpolationList->setCurrentIndex(1);
 
    X_Spacing->setMinimum(0);
    X_Spacing->setDecimals(3);
@@ -255,9 +264,9 @@ void Ortho_GUI::init()
 
 void Ortho_GUI::StartOrtho()
 {
-	mpStartOrtho->setEnabled(false);
+   mpStartOrtho->setEnabled(false);
 
-	// Update Grid Information
+   // Update Grid Information
    OrthoGrid.X_Step = X_Spacing->value();
    OrthoGrid.Y_Step = Y_Spacing->value();
 
@@ -296,24 +305,13 @@ void Ortho_GUI::StartOrtho()
 	
 	if (mpFlatten->isChecked() ==true) 
 	{
-		
-/*	switch (indexR)
-	{
-	case 0: ProcessOrtho.execute(NEAREST_NEIGHBOR);
-	case 3: ProcessOrtho.execute(AVERAGEBOX7);
-	
-	} */
-
-	ProcessOrtho.execute(indexR);
+		VERIFYNRV(ProcessOrtho.execute(indexR));
 	}
 	else 
 	{
 		VERIFYNRV(RetrieveDSMGrid());
-
-		bool control = ProcessOrtho.execute(indexR, pDSM, DSMGrid, GeoidOffSet->value());
-
+		VERIFYNRV(ProcessOrtho.execute(indexR, pDSM, DSMGrid, GeoidOffSet->value(),mpDSMInterpolationList->currentIndex()));
 	}
-
 
 }
 

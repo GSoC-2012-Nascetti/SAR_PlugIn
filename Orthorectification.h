@@ -69,7 +69,7 @@ public:
     virtual bool getOutputSpecification(PlugInArgList*& pOutArgList);
     virtual bool execute(int type);
 	virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
-	virtual bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, double Geoid_Offset);
+	virtual bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, double Geoid_Offset,int DSM_resampling=1);
 	
 private:
 

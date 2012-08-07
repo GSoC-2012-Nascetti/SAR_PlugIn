@@ -75,6 +75,7 @@ private:
    QComboBox* mpImageListCombo;
    QComboBox* mpDSMListCombo;
    QComboBox* mpInterpolationList;
+   QComboBox* mpDSMInterpolationList;
 
    QDoubleSpinBox* Height;
    QDoubleSpinBox* GeoidOffSet;
@@ -83,6 +84,7 @@ private:
 
    QLabel* Datum;
    QLabel* Resampling;
+   QLabel* DSMResampling;
 
    QRadioButton* mpFlatten;
    QRadioButton* mpDsm;
@@ -94,7 +96,6 @@ private:
 
    void init();
    std::vector<std::string> mCubeNames;
-
 
 };
 
