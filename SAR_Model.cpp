@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <math.h>
 
-
 std::vector<OrbitCoefficients> LagrangeCoeff(std::vector<STATEVECTOR> &StateVect)
 {
 	int N = 0 ;

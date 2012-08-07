@@ -48,10 +48,10 @@ SAR_GUI::SAR_GUI( QWidget* pParent, const char* pName, bool modal )
 {
    if (pName == NULL)
    {
-      setObjectName( "3D Stero Measurements" );
+      setObjectName( "3D Stero Measurement" );
    }
    setModal( FALSE );
-   setWindowTitle("3D Stero Measurements");
+   setWindowTitle("3D Stero Measurement");
 
    // GUI widget object initialitation
    labelImageLeft  = new QLabel( "Select Image Left", this );
@@ -200,7 +200,7 @@ void SAR_GUI::GetMapLocation()
 {
 	Service<ModelServices> pModel;
 
-	ProgressResource pProgress("pProgress");
+	ProgressResource pProgress("ProgressBar");
 
     pProgress->updateProgress("Retrieving coordinate", 0, NORMAL);
     
