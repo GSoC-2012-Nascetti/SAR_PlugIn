@@ -37,11 +37,6 @@
 #include <iostream>
 #include <fstream>
 
-#include "AppConfig.h"
-#include "AppVerify.h"
-#include "Tutorial2.h"
-
-
 double bilinear_height(DataAccessor pSrcAcc, double I, double J)
    {
 

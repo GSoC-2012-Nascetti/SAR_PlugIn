@@ -14,7 +14,7 @@
     <aebl:licenseURL>aeb:///license/lgpl-2.1.txt</aebl:licenseURL>
     <aebl:iconURL>aeb:///icon/SAR_icon.png</aebl:iconURL>
  
-    <aebl:homepageURL>https://opticks.ballforge.net</aebl:homepageURL>    
+    <aebl:homepageURL>http://opticks.org/confluence/display/~a.nascetti/GSOC+2012+-+SAR+Processing+Tools+-+Geocoding+and+stereo+measurement</aebl:homepageURL>    
 
     <aebl:targetApplication>
       <rdf:Description>
