@@ -7,26 +7,27 @@
 * http://www.gnu.org/licenses/lgpl.html
 */
 
-#ifndef SAR_GUI_H
-#define SAR_GUI_H
+#ifndef StereoMeasurement_GUI_H
+#define StereoMeasurement_GUI_H
+
+#include "DockWindow.h"
+#include "Layer.h"
+#include "PlotWidget.h"
 
 #include <QtGui/QDialog>
 #include <QtGui/QGroupBox>
-#include "PlotWidget.h"
-#include "DockWindow.h"
-#include "Layer.h"
 
 class QComboBox;
 class QDoubleSpinBox;
 class QLabel;
 
-class SAR_GUI : public QDialog
+class StereoMeasurement_GUI : public QDialog
 {
     Q_OBJECT
 
 public:
-    SAR_GUI( QWidget* pParent = 0, const char* pName = 0, bool modal = FALSE );
-    ~SAR_GUI();
+    StereoMeasurement_GUI( QWidget* pParent = 0, const char* pName = 0, bool modal = FALSE );
+    ~StereoMeasurement_GUI();
 
 	std::string prova,name_left,name_right;
 
@@ -40,8 +41,8 @@ public slots:
 	void GetPixelLocation(bool);
 
 private:
-   SAR_GUI(const SAR_GUI& rhs);
-   SAR_GUI& operator=(const SAR_GUI& rhs);
+   StereoMeasurement_GUI(const StereoMeasurement_GUI& rhs);
+   StereoMeasurement_GUI& operator=(const StereoMeasurement_GUI& rhs);
 
    QPushButton* mpCancelButton;
    QPushButton* mpApplyButton;
@@ -50,9 +51,6 @@ private:
 
    QComboBox* mpCubeListCombo;
    QComboBox* mpCubeListCombo_slave;
-
-   //QDoubleSpinBox* mpXScaleFactor;
-   //QDoubleSpinBox* mpYScaleFactor;
 
    QDoubleSpinBox* leftX;
    QDoubleSpinBox* rightX;

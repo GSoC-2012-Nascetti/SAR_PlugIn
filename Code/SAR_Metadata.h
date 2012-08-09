@@ -9,11 +9,11 @@
 
 #pragma once
 
+#include "GcpList.h"
 #include <string>
 #include <stdexcept>
 #include <vector>
 #include <cstdlib>
-#include "GcpList.h"
 
 using namespace std;
 

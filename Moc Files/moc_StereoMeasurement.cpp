@@ -1,15 +1,15 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'Test_GUI.h'
+** Meta object code from reading C++ file 'StereoMeasurement.h'
 **
-** Created: Tue 31. Jul 14:51:46 2012
+** Created: Wed 8. Aug 11:43:06 2012
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../application/PlugIns/src/Tutorial/Test_GUI.h"
+#include "../../../application/PlugIns/src/SAR_PlugIn/Code/StereoMeasurement.h"
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'Test_GUI.h' doesn't include <QObject>."
+#error "The header file 'StereoMeasurement.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 62
 #error "This file was generated using the moc from 4.7.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -17,7 +17,7 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-static const uint qt_meta_data_Test_GUI[] = {
+static const uint qt_meta_data_StereoMeasurement[] = {
 
  // content:
        5,       // revision
@@ -31,40 +31,40 @@ static const uint qt_meta_data_Test_GUI[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      10,    9,    9,    9, 0x0a,
+      19,   18,   18,   18, 0x0a,
 
        0        // eod
 };
 
-static const char qt_meta_stringdata_Test_GUI[] = {
-    "Test_GUI\0\0dialogClosed()\0"
+static const char qt_meta_stringdata_StereoMeasurement[] = {
+    "StereoMeasurement\0\0dialogClosed()\0"
 };
 
-const QMetaObject Test_GUI::staticMetaObject = {
-    { &QObject::staticMetaObject, qt_meta_stringdata_Test_GUI,
-      qt_meta_data_Test_GUI, 0 }
+const QMetaObject StereoMeasurement::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_StereoMeasurement,
+      qt_meta_data_StereoMeasurement, 0 }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &Test_GUI::getStaticMetaObject() { return staticMetaObject; }
+const QMetaObject &StereoMeasurement::getStaticMetaObject() { return staticMetaObject; }
 #endif //Q_NO_DATA_RELOCATION
 
-const QMetaObject *Test_GUI::metaObject() const
+const QMetaObject *StereoMeasurement::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
 }
 
-void *Test_GUI::qt_metacast(const char *_clname)
+void *StereoMeasurement::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_Test_GUI))
-        return static_cast<void*>(const_cast< Test_GUI*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_StereoMeasurement))
+        return static_cast<void*>(const_cast< StereoMeasurement*>(this));
     if (!strcmp(_clname, "ViewerShell"))
-        return static_cast< ViewerShell*>(const_cast< Test_GUI*>(this));
+        return static_cast< ViewerShell*>(const_cast< StereoMeasurement*>(this));
     return QObject::qt_metacast(_clname);
 }
 
-int Test_GUI::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int StereoMeasurement::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QObject::qt_metacall(_c, _id, _a);
     if (_id < 0)

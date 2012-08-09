@@ -15,9 +15,12 @@
 #include "DataVariant.h"
 #include "DataVariantAnyData.h" 
 #include "DataVariantFactory.h" 
+#include "DesktopServices.h"
 #include "DynamicObject.h"
 #include "FileDescriptor.h"
 #include "Filename.h"
+#include "GcpList.h"
+#include "GcpLayer.h"
 #include "MessageLogResource.h"
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
@@ -28,20 +31,18 @@
 #include "RADARSAT_Metadata.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
-#include "stdlib.h"
-#include <stdio.h>
+#include "SAR_Model.h"
 #include "StringUtilities.h"
 #include "switchOnEncoding.h"
 #include "Test_Update_RADARSAT2.h"
+#include "TypeConverter.h"
 #include "UtilityServices.h"
 
-#include "DesktopServices.h"
-#include "GcpList.h"
-#include "GcpLayer.h"
-#include "TypeConverter.h"
+#include <stdlib.h>
+#include <stdio.h>
+
 #include <QtCore/QStringList>
 #include <QtGui/QInputDialog>
-#include "SAR_Model.h"
 
 #include "boost/accumulators/accumulators.hpp"
 #include "boost/accumulators/statistics/stats.hpp"
@@ -56,8 +57,8 @@ Test_Update_RADARSAT2::Test_Update_RADARSAT2(void)
 {
    setDescriptorId("{5B0E9306-AFF1-11E1-9476-083F6288709B}");
    setName("Test_Update_RADARSAT2");
-   setDescription("Accessing RADARSAT2 Metadata");
-   setCreator("Opticks Community");
+   setDescription("Accessing RADARSAT2 Metadata and model assessment");
+   setCreator("Andrea Nascetti");
    setVersion("Sample");
    setCopyright("Copyright(c) 2012, Andrea Nascetti <andreanascetti@gmail.com>");
    setProductionStatus(false);
@@ -78,14 +79,10 @@ bool Test_Update_RADARSAT2::getInputSpecification(PlugInArgList* &pInArgList)
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
    pInArgList->addArg<RasterElement>(Executable::DataElementArg(), "Update SAR Metadaa for this raster element");
   
-   // *************** Prova lettura GCPs ********************** //
-
    if (isBatch())
    {
       pInArgList->addArg<GcpList>("GcpList", NULL, "The GCP List to calculate statistics over");
    }
-
-   // ********************************************************* //
 
    return true;
 }

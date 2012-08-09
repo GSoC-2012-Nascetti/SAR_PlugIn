@@ -15,9 +15,12 @@
 #include "DataVariant.h"
 #include "DataVariantAnyData.h" 
 #include "DataVariantFactory.h" 
+#include "DesktopServices.h"
 #include "DynamicObject.h"
 #include "FileDescriptor.h"
 #include "Filename.h"
+#include "GcpList.h"
+#include "GcpLayer.h"
 #include "MessageLogResource.h"
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
@@ -34,15 +37,11 @@
 #include "switchOnEncoding.h"
 #include "Test_Update_TerraSAR.h"
 #include "TerraSAR_Metadata.h"
+#include "TypeConverter.h"
 #include "UtilityServices.h"
 
-#include "DesktopServices.h"
-#include "GcpList.h"
-#include "GcpLayer.h"
-#include "TypeConverter.h"
 #include <QtCore/QStringList>
 #include <QtGui/QInputDialog>
-#include "SAR_Model.h"
 
 #include "boost/accumulators/accumulators.hpp"
 #include "boost/accumulators/statistics/stats.hpp"
@@ -58,7 +57,7 @@ Test_Update_TerraSAR::Test_Update_TerraSAR(void)
    setDescriptorId("{501590E6-AFEF-11E1-A4F3-393D6288709B}");
    setName("Test_Update_TerraSAR");
    setDescription("Accessing TerraSAR Metadata");
-   setCreator("Opticks Community");
+   setCreator("Andrea Nascetti");
    setVersion("Sample");
    setCopyright("Copyright(c) 2012, Andrea Nascetti <andreanascetti@gmail.com>");
    setProductionStatus(false);

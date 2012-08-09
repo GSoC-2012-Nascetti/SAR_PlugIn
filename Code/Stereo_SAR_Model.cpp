@@ -64,14 +64,8 @@ Stereo_SAR_Model::~Stereo_SAR_Model(void)
 
 COORD_Ecef Stereo_SAR_Model::Stereo_SAR_SlantToGround(double Left_I,double Left_J,double Right_I, double Right_J)
 {
-	ofstream output;
-	output.open("prova_matrix.txt");
-
 	int index_left = int(Mod_Left->PrecisionIndex*Left_J);
 	int index_right = int(Mod_Right->PrecisionIndex*Right_J);
-
-	output<<Left_I<<" "<<Left_J<<endl;
-	output<<Right_I<<" "<<Right_J<<endl;
 
 	SAT_COORD_Left.DOY = Mod_Left->StateVectorsRows[index_left].DOY;
 	SAT_COORD_Left.X =   Mod_Left->StateVectorsRows[index_left].X;
@@ -89,9 +83,6 @@ COORD_Ecef Stereo_SAR_Model::Stereo_SAR_SlantToGround(double Left_I,double Left_
 	SAT_COORD_Right.VelocityY = Mod_Right->StateVectorsRows[index_right].VelocityY;
 	SAT_COORD_Right.VelocityZ = Mod_Right->StateVectorsRows[index_right].VelocityZ;
 
-	output<<SAT_COORD_Left.X<<" "<<SAT_COORD_Left.Y<<" "<<SAT_COORD_Left.Z<<endl;
-	output<<SAT_COORD_Right.X<<" "<<SAT_COORD_Right.Y<<" "<<SAT_COORD_Right.Z<<endl;
-
 	// Retrieve approximated coordinate 
 
 	ALFAUNO  = SAT_COORD_Left.VelocityX;     
@@ -102,11 +93,8 @@ COORD_Ecef Stereo_SAR_Model::Stereo_SAR_SlantToGround(double Left_I,double Left_
     BETADUE  = SAT_COORD_Right.VelocityY; 
     GAMMADUE = SAT_COORD_Right.VelocityZ;
 
-	K10 = Mod_Left->Metadata.RangeD0 + Mod_Left->Metadata.RangeDi*Left_I;  //metadata_left.DI + metadata_left.CS*I_L;
-    K14 = Mod_Right->Metadata.RangeD0 + Mod_Right->Metadata.RangeDi*Right_I;  //metadata_right.DI + metadata_right.CS*I_R;   
-    
-	output<<"Dist1 "<<K10<<endl;
-	output<<"Dist2 "<<K14<<endl;
+	K10 = Mod_Left->Metadata.RangeD0 + Mod_Left->Metadata.RangeDi*Left_I;  
+    K14 = Mod_Right->Metadata.RangeD0 + Mod_Right->Metadata.RangeDi*Right_I;  
 	
     K0= BETAUNO/ALFAUNO;
     K1= GAMMAUNO/ALFAUNO;
@@ -124,8 +112,6 @@ COORD_Ecef Stereo_SAR_Model::Stereo_SAR_SlantToGround(double Left_I,double Left_
 
     ZG1=(K12+sqrt(K12*K12-K11*K13))/(K11);
     ZG2=(K12-sqrt(K12*K12-K11*K13))/(K11);
-
-	//if (ZG1>ZG2) //Inserire controllo con il raggio terra
 	
 	double mod1 = sqrt((ZG1*ZG1)+(-ZG1*K6+K7)*(-ZG1*K6+K7)+((K4/K3)*ZG1+K5/K3)*((K4/K3)*ZG1+K5/K3));
 	double mod2 = sqrt((ZG2*ZG2)+(-ZG2*K6+K7)*(-ZG2*K6+K7)+((K4/K3)*ZG2+K5/K3)*((K4/K3)*ZG2+K5/K3));
@@ -142,37 +128,6 @@ COORD_Ecef Stereo_SAR_Model::Stereo_SAR_SlantToGround(double Left_I,double Left_
 		Point.X_Ecef = -ZG2*K6+K7;
 		Point.Y_Ecef = (K4/K3)*ZG2+K5/K3;
 	}
-
-	output<<"modulo prima soluzione"<<endl;
-	output<< sqrt((ZG1*ZG1)+(-ZG1*K6+K7)*(-ZG1*K6+K7)+((K4/K3)*ZG1+K5/K3)*((K4/K3)*ZG1+K5/K3))<<endl;
-	output<<"modulo seconda soluzione"<<endl;
-	output<< sqrt((ZG2*ZG2)+(-ZG2*K6+K7)*(-ZG2*K6+K7)+((K4/K3)*ZG2+K5/K3)*((K4/K3)*ZG2+K5/K3))<<endl;
-
-	//************************** PROVA CAMBIO COORDINATE APPROX ******************
-	/*
-
-	COORD_Ecef Control;
-
-	Control.Longitude= -112.0825;
-	Control.Latitude=  33.29833333;
-	Control.Height = 100.00;
-
-	Control = GeoToEcef(Control);
-	
-	output<<"Vecchie coord approx"<<endl;
-	output<< Point.X_Ecef<<" "<<Point.Y_Ecef<< " "<<Point.Z_Ecef<<endl;
-	
-	Point.X_Ecef = Control.X_Ecef;
-	Point.Y_Ecef = Control.Y_Ecef;
-	Point.Z_Ecef = Control.Z_Ecef;
-	
-	output<<"Nuove coord approx"<<endl;
-	output<< Point.X_Ecef<<" "<<Point.Y_Ecef<< " "<<Point.Z_Ecef<<endl;
-
-	*/
-	// *******************************************************************************
-
-
 
 	// LEAST SQUARES //
 		
@@ -248,21 +203,9 @@ COORD_Ecef Stereo_SAR_Model::Stereo_SAR_SlantToGround(double Left_I,double Left_
       
         TN(3,0)=sqrt(LOSx*LOSx+LOSy*LOSy+LOSz*LOSz)-(Mod_Right->Metadata.RangeD0 + Mod_Right->Metadata.RangeDi*Right_I); //metadata_right.DI + metadata_right.CS*I_R)
 
-		output<< "Matrice A"<<endl;
-		output<<A<<endl;
-
-		output<<"Termine noto normale"<<endl;
-		output<<TN<<endl; 
-	
 		AT = trans(A);
 
-		output<<"A Trasposta"<<endl;
-		output<<AT<<endl;
-
 		input = prod(AT,A);
-
-		output<<"A Trasposta*A"<<endl;
-		output<<input<<endl;
 
 		int n = 3;
 		typedef permutation_matrix<std::size_t> pmatrix;
@@ -272,22 +215,12 @@ COORD_Ecef Stereo_SAR_Model::Stereo_SAR_SlantToGround(double Left_I,double Left_
  		pmatrix pmi(A.size1());
 		
 		int res = lu_factorize(A,pmi);
-	//	if( res != 0 ) output<<"non è invertibile";
-
-        output<<"Fattore A"<<endl;
-		output<<A<<endl;
-
-	    output<<"Fattore B"<<endl;
-		output<<pmi<<endl;
 	
 		matrix<double> X(n,1);		
 
 		X = prod(AT,TN);
 
 		lu_substitute(A,pmi,X);
-
-	    output<<"Correzioni coord"<<endl;
-		output<<X<<endl;
 	
 		Point.X_Ecef-=X(0,0);
         Point.Y_Ecef-=X(1,0);
@@ -297,15 +230,11 @@ COORD_Ecef Stereo_SAR_Model::Stereo_SAR_SlantToGround(double Left_I,double Left_
 		sigma = prod(trans(X),X);
 		
 		double sigma_zero = sqrt(sigma(0,0));
-
-		output<<"Sigma Zero ="<<sigma_zero<<endl;
 				
 		if (sigma_zero < 0.0000000001) ITERAZIONI =1;
 		if (sigma_zero > sigma_zero_step) ITERAZIONI =1;
 		ITERAZIONI++;
 	}
-		
-	 output.close();
 	
 	// COORDINATES TRANSFORMATION ECEF TO PHI-LAMBDA//
 	double aao=6378137.0;

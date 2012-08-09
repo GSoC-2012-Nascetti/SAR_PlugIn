@@ -10,40 +10,38 @@
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 #include "DesktopServices.h"
-#include "SAR_GUI.h"
+#include "Layer.h"
+#include "LayerList.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
 #include "Progress.h"
-#include "RasterElement.h"
+#include "ProgressResource.h"
+#include "RADARSAT_Metadata.h"
 #include "RasterDataDescriptor.h"
+#include "RasterElement.h"
+#include "StereoMeasurement_GUI.h"
+#include "SAR_Model.h"
 #include "Service.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
-
-#include "TerraSAR_Metadata.h"
-#include "RADARSAT_Metadata.h"
-#include "SAR_Model.h"
 #include "Stereo_SAR_Model.h"
 #include "StringUtilities.h"
-#include <ProgressResource.h>
+#include "TerraSAR_Metadata.h"
 #include "Test_Update_TerraSAR.h"
-#include "Layer.h"
-#include "LayerList.h"
 
+#include <Qt/qevent.h>
 #include <QtCore/QFileInfo>
+#include <QtCore/QObject>
+#include <QtGui/QAction>
+#include <QtGui/QCheckBox>
 #include <QtGui/QComboBox>
 #include <QtGui/QDoubleSpinBox>
 #include <QtGui/QGridLayout>
 #include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <Qt/qevent.h>
 #include <QtGui/QMessageBox>
-#include <QtGui/QCheckBox>
-#include <QtCore/QObject>
-#include <QtGui/QAction>
+#include <QtGui/QPushButton>
 
-
-SAR_GUI::SAR_GUI( QWidget* pParent, const char* pName, bool modal )
+StereoMeasurement_GUI::StereoMeasurement_GUI( QWidget* pParent, const char* pName, bool modal )
 : QDialog(pParent)
 {
    if (pName == NULL)
@@ -113,7 +111,7 @@ SAR_GUI::SAR_GUI( QWidget* pParent, const char* pName, bool modal )
    box1->setLayout(pLayout2);
    pLayout->addWidget( box1, 2, 0,2,5);
    
-   // Geographic Coordinate Group Box
+   // Geographic Coordinate Group Box //
 
    QGridLayout* pLayout3 = new QGridLayout();
 
@@ -128,17 +126,13 @@ SAR_GUI::SAR_GUI( QWidget* pParent, const char* pName, bool modal )
    box2->setLayout(pLayout3);
    pLayout->addWidget( box2, 4, 0,2,3);
 
-   // Button 
-
+   // Button //
    pLayout->addWidget(pEnableGetCoordinate, 4,3);
-
    pLayout->addWidget( mpCancelButton, 6, 4);
    pLayout->addWidget( mpGetMapLocation, 6, 0 );   
-
    mpCancelButton->setText("Close");
-   //resize( QSize(600, 150).expandedTo(minimumSizeHint()) );
    
-   // signals and slots connections
+   // signals and slots connections //
    bool ok = connect( mpCancelButton, SIGNAL( clicked() ), this, SLOT( reject() ) );
    ok = connect( mpGetMapLocation, SIGNAL( clicked() ),this, SLOT( GetMapLocation()));
    ok  = connect(pEnableGetCoordinate, SIGNAL(toggled(bool)), this, SLOT(GetPixelLocation(bool)));
@@ -147,15 +141,12 @@ SAR_GUI::SAR_GUI( QWidget* pParent, const char* pName, bool modal )
 
 }
 
-/*
-*  Destroys the object and frees any allocated resources
-*/
-SAR_GUI::~SAR_GUI()
+StereoMeasurement_GUI::~StereoMeasurement_GUI()
 {
 
 }
 
-void SAR_GUI::init()
+void StereoMeasurement_GUI::init()
 {
    Service<ModelServices> pModel;
    mCubeNames = pModel->getElementNames("RasterElement");
@@ -196,7 +187,7 @@ void SAR_GUI::init()
 
 }
   
-void SAR_GUI::GetMapLocation()
+void StereoMeasurement_GUI::GetMapLocation()
 {
 	Service<ModelServices> pModel;
 
@@ -369,10 +360,13 @@ void SAR_GUI::GetMapLocation()
 	
 }
 
-void SAR_GUI::GetPixelLocation(bool pEnable)
+void StereoMeasurement_GUI::GetPixelLocation(bool pEnable)
 {
    if (pEnable == true)
    {
+
+   mpCubeListCombo->setEnabled(false);
+   mpCubeListCombo_slave->setEnabled(false);
 
    Service<DesktopServices> pDesktop;
 	
@@ -405,6 +399,10 @@ void SAR_GUI::GetPixelLocation(bool pEnable)
    }
    else
    {
+	   
+	   mpCubeListCombo->setEnabled(true);
+	   mpCubeListCombo_slave->setEnabled(true);
+
 	   Service<DesktopServices> pDesktop;	
 	   std::vector<Window*> windows;
 	   pDesktop->getWindows(SPATIAL_DATA_WINDOW, windows);
@@ -430,7 +428,7 @@ void SAR_GUI::GetPixelLocation(bool pEnable)
 
 }
 
-void SAR_GUI::mousePressEvent(QMouseEvent *event)
+void StereoMeasurement_GUI::mousePressEvent(QMouseEvent *event)
  {
      if (event->button() == Qt::LeftButton) 
 	 {
@@ -446,7 +444,7 @@ void SAR_GUI::mousePressEvent(QMouseEvent *event)
      }
  }
 
-bool SAR_GUI::eventFilter(QObject* pObject, QEvent* pEvent)
+bool StereoMeasurement_GUI::eventFilter(QObject* pObject, QEvent* pEvent)
 {
    
 	if (pEvent->type() == QEvent::MouseButtonPress) 
@@ -518,14 +516,6 @@ bool SAR_GUI::eventFilter(QObject* pObject, QEvent* pEvent)
 
                                           unsigned int originalSceneX = columnDim.getOriginalNumber();
                                           unsigned int originalSceneY = rowDim.getOriginalNumber();
-
-										  /*
-                                          QMessageBox::information(pViewWidget, "Display Pixel Coordinate",
-                                             "The coordinate of the selected pixel is (" +
-                                             QString::number(originalSceneX) + ", " +
-                                             QString::number(originalSceneY) + ")");
-										  */
-
 
 										  if (pSpatialDataView->getName()== name_left)
 										  {

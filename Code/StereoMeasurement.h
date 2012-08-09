@@ -7,19 +7,19 @@
 * http://www.gnu.org/licenses/lgpl.html
 */
 
-#ifndef Test_GUI_H
-#define Test_GUI_H
+#ifndef StereoMeasurement_H
+#define StereoMeasurement_H
 
 #include "ViewerShell.h"
-#include "SAR_GUI.h"
+#include "StereoMeasurement_GUI.h"
 
-class Test_GUI : public QObject, public ViewerShell
+class StereoMeasurement : public QObject, public ViewerShell
 {
    Q_OBJECT
 
 public:
-   Test_GUI();
-   ~Test_GUI();
+   StereoMeasurement();
+   ~StereoMeasurement();
 
    bool execute(PlugInArgList*, PlugInArgList*);
    QWidget* getWidget() const;
@@ -30,10 +30,10 @@ public slots:
    void dialogClosed();
 
 private:
-   Test_GUI(const Test_GUI& rhs);
-   Test_GUI& operator=(const Test_GUI& rhs);
+   StereoMeasurement(const StereoMeasurement& rhs);
+   StereoMeasurement& operator=(const StereoMeasurement& rhs);
    bool showGui();
-   SAR_GUI* mpGui;
+   StereoMeasurement_GUI* mpGui;
 };
 
 #endif

@@ -1,13 +1,13 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'Ortho_GUI.h'
 **
-** Created: Tue 31. Jul 14:51:46 2012
+** Created: Thu 9. Aug 12:09:10 2012
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../application/PlugIns/src/Tutorial/Ortho_GUI.h"
+#include "../../../application/PlugIns/src/SAR_PlugIn/Code/Ortho_GUI.h"
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'Ortho_GUI.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 62
@@ -23,7 +23,7 @@ static const uint qt_meta_data_Ortho_GUI[] = {
        5,       // revision
        0,       // classname
        0,    0, // classinfo
-       4,   14, // methods
+       5,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -35,13 +35,15 @@ static const uint qt_meta_data_Ortho_GUI[] = {
       24,   10,   10,   10, 0x0a,
       37,   10,   10,   10, 0x0a,
       50,   10,   10,   10, 0x0a,
+      69,   10,   64,   10, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_Ortho_GUI[] = {
     "Ortho_GUI\0\0StartOrtho()\0CheckImage()\0"
-    "CheckModel()\0ComputeGrid()\0"
+    "CheckModel()\0ComputeGrid()\0bool\0"
+    "RetrieveDSMGrid()\0"
 };
 
 const QMetaObject Ortho_GUI::staticMetaObject = {
@@ -77,9 +79,11 @@ int Ortho_GUI::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 1: CheckImage(); break;
         case 2: CheckModel(); break;
         case 3: ComputeGrid(); break;
+        case 4: { bool _r = RetrieveDSMGrid();
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = _r; }  break;
         default: ;
         }
-        _id -= 4;
+        _id -= 5;
     }
     return _id;
 }

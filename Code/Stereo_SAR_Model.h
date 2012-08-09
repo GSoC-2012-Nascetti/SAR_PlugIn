@@ -7,7 +7,8 @@
 * http://www.gnu.org/licenses/lgpl.html
 */
 
-#pragma once
+#ifndef STEREO_SAR_MODEL_H
+#define STEREO_SAR_MODEL_H
 
 #include "SAR_Model.h"
 
@@ -30,3 +31,4 @@ private:
 	SAR_Model *Mod_Left, *Mod_Right;
 };
 
+#endif

@@ -7,7 +7,9 @@
 * http://www.gnu.org/licenses/lgpl.html
 */
 
-#pragma once
+#ifndef SAR_MODEL_H
+#define SAR_MODEL_H
+
 #include "GcpList.h"
 #include "SAR_Metadata.h"
 
@@ -51,3 +53,4 @@ public:
 	int PrecisionIndex;
 };
 
+#endif
