@@ -1,21 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Moc Files\moc_Ortho_GUI.cpp">
-      <Filter>Moc Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Moc Files\moc_Ortho_RADARSAT.cpp">
-      <Filter>Moc Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Moc Files\moc_Ortho_TerraSAR.cpp">
-      <Filter>Moc Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Moc Files\moc_SAR_GUI.cpp">
-      <Filter>Moc Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Moc Files\moc_Test_GUI.cpp">
-      <Filter>Moc Files</Filter>
-    </ClCompile>
     <ClCompile Include="Code\xmlreaderSAR.cpp">
       <Filter>Metadata Reader</Filter>
     </ClCompile>
@@ -27,12 +12,6 @@
     </ClCompile>
     <ClCompile Include="Code\TerraSAR_Metadata.cpp">
       <Filter>Metadata Reader</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\SAR_GUI.cpp">
-      <Filter>3D Stereo Measurement</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Test_GUI.cpp">
-      <Filter>3D Stereo Measurement</Filter>
     </ClCompile>
     <ClCompile Include="Code\Ortho_GUI.cpp">
       <Filter>Orthorectification</Filter>
@@ -59,6 +38,28 @@
       <Filter>SAR Orientation Model</Filter>
     </ClCompile>
     <ClCompile Include="Code\ModuleManager.cpp" />
+    <ClCompile Include="Code\StereoMeasurement.cpp">
+      <Filter>3D Stereo Measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="Moc Files\moc_StereoMeasurement.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\StereoMeasurement_GUI.cpp">
+      <Filter>3D Stereo Measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="Moc Files\moc_StereoMeasurement_GUI.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moc Files\moc_Ortho_GUI.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moc Files\moc_Ortho_TerraSAR.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moc Files\moc_Ortho_RADARSAT.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\TestSAR.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\xmlreaderSAR.h">
@@ -73,22 +74,7 @@
     <ClInclude Include="Code\TerraSAR_Metadata.h">
       <Filter>Metadata Reader</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Test_GUI.h">
-      <Filter>3D Stereo Measurement</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\SAR_GUI.h">
-      <Filter>3D Stereo Measurement</Filter>
-    </ClInclude>
     <ClInclude Include="Code\Orthorectification.h">
-      <Filter>Orthorectification</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Ortho_GUI.h">
-      <Filter>Orthorectification</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Ortho_RADARSAT.h">
-      <Filter>Orthorectification</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Ortho_TerraSAR.h">
       <Filter>Orthorectification</Filter>
     </ClInclude>
     <ClInclude Include="Code\Stereo_SAR_Model.h">
@@ -103,6 +89,7 @@
     <ClInclude Include="Code\Test_Update_RADARSAT2.h">
       <Filter>SAR Orientation Model</Filter>
     </ClInclude>
+    <ClInclude Include="Code\TestSAR.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="SAR Orientation Model">
@@ -120,5 +107,22 @@
     <Filter Include="Metadata Reader">
       <UniqueIdentifier>{17ae096f-82c8-4b61-b714-853de7620434}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="Code\StereoMeasurement.h">
+      <Filter>3D Stereo Measurement</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Code\StereoMeasurement_GUI.h">
+      <Filter>3D Stereo Measurement</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Code\Ortho_GUI.h">
+      <Filter>Orthorectification</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Code\Ortho_RADARSAT.h">
+      <Filter>Orthorectification</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Code\Ortho_TerraSAR.h">
+      <Filter>Orthorectification</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

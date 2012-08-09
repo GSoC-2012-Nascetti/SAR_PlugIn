@@ -151,33 +151,55 @@
     <ClCompile Include="Code\Ortho_RADARSAT.cpp" />
     <ClCompile Include="Code\Ortho_TerraSAR.cpp" />
     <ClCompile Include="Code\RADARSAT_Metadata.cpp" />
-    <ClCompile Include="Code\SAR_GUI.cpp" />
+    <ClCompile Include="Code\StereoMeasurement_GUI.cpp" />
     <ClCompile Include="Code\SAR_Metadata.cpp" />
     <ClCompile Include="Code\SAR_Model.cpp" />
     <ClCompile Include="Code\Stereo_SAR_Model.cpp" />
     <ClCompile Include="Code\TerraSAR_Metadata.cpp" />
-    <ClCompile Include="Code\Test_GUI.cpp" />
+    <ClCompile Include="Code\StereoMeasurement.cpp" />
+    <ClCompile Include="Code\TestSAR.cpp" />
     <ClCompile Include="Code\Test_Update_RADARSAT2.cpp" />
     <ClCompile Include="Code\Test_Update_TerraSAR.cpp" />
     <ClCompile Include="Code\xmlreaderSAR.cpp" />
     <ClCompile Include="Moc Files\moc_Ortho_GUI.cpp" />
     <ClCompile Include="Moc Files\moc_Ortho_RADARSAT.cpp" />
     <ClCompile Include="Moc Files\moc_Ortho_TerraSAR.cpp" />
-    <ClCompile Include="Moc Files\moc_SAR_GUI.cpp" />
-    <ClCompile Include="Moc Files\moc_Test_GUI.cpp" />
+    <ClCompile Include="Moc Files\moc_StereoMeasurement.cpp" />
+    <ClCompile Include="Moc Files\moc_StereoMeasurement_GUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Orthorectification.h" />
-    <ClInclude Include="Code\Ortho_GUI.h" />
-    <ClInclude Include="Code\Ortho_RADARSAT.h" />
-    <ClInclude Include="Code\Ortho_TerraSAR.h" />
+    <CustomBuild Include="Code\Ortho_GUI.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="Code\Ortho_RADARSAT.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="Code\Ortho_TerraSAR.h">
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+    </CustomBuild>
     <ClInclude Include="Code\RADARSAT_Metadata.h" />
-    <ClInclude Include="Code\SAR_GUI.h" />
+    <CustomBuild Include="Code\StereoMeasurement_GUI.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <ClInclude Include="Code\SAR_Metadata.h" />
     <ClInclude Include="Code\SAR_Model.h" />
     <ClInclude Include="Code\Stereo_SAR_Model.h" />
     <ClInclude Include="Code\TerraSAR_Metadata.h" />
-    <ClInclude Include="Code\Test_GUI.h" />
+    <CustomBuild Include="Code\StereoMeasurement.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <ClInclude Include="Code\TestSAR.h" />
     <ClInclude Include="Code\Test_Update_RADARSAT2.h" />
     <ClInclude Include="Code\Test_Update_TerraSAR.h" />
     <ClInclude Include="Code\xmlreaderSAR.h" />
