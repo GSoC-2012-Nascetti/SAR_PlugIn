@@ -13,12 +13,15 @@
 #include "DesktopServices.h"
 #include "GcpLayer.h"
 #include "GcpList.h"
+#include "Georeference.h"
+#include "GeoreferenceShell.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
 #include "Orthorectification.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
+#include "PlugInResource.h"
 #include "Progress.h"
 #include "ProgressResource.h"
 #include "RasterDataDescriptor.h"
@@ -33,6 +36,11 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+
+#include "AppConfig.h"
+#include "AppVerify.h"
+#include "Tutorial2.h"
+
 
 double bilinear_height(DataAccessor pSrcAcc, double I, double J)
    {
@@ -84,7 +92,7 @@ namespace
    }
 };
 
-Orthorectification::Orthorectification(RasterElement *inputRaster, SAR_Model *inputModel,GRID inputGrid,double inputHeight)//,GRID *inputGrid,float *inputModel)
+Orthorectification::Orthorectification(RasterElement *inputRaster, SAR_Model *inputModel,GRID inputGrid,double inputHeight)
 {
 	Image = inputRaster;
 
@@ -94,25 +102,9 @@ Orthorectification::Orthorectification(RasterElement *inputRaster, SAR_Model *in
 
 	FlatHeight = inputHeight;
 
-	setAbortSupported(true);
 }
 
-bool Orthorectification::getInputSpecification(PlugInArgList*& pInArgList)
-{
-	return true;
-}
-
-bool Orthorectification::getOutputSpecification(PlugInArgList*& pOutArgList)
-{
-    return true;
-}
-
-bool Orthorectification::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
-{
-	return true;
-}
-
-bool Orthorectification::execute(int type)
+bool Orthorectification::process(int type)
 {
 	StepResource pStep("Orthorectification Process", "app", "B4D426EC-E06D-11E1-83C8-42E56088709B");
 	pStep->addStep("Start","app", "B4D426EC-E06D-11E1-83C8-42E56088709B");
@@ -197,17 +189,6 @@ bool Orthorectification::execute(int type)
 	  {
       pProgress->updateProgress("Calculating result", row * 100 / N_Row, NORMAL);
 	  }
-
-	  if (isAborted())
-      {
-         std::string msg = getName() + " has been aborted.";
-         pStep->finalize(Message::Abort, msg);
-         if (pProgress != NULL)
-         {
-            pProgress->updateProgress(msg, 0, ABORT);
-         }
-         return false;
-      }
 
       if (!pDestAcc.isValid())
       {
@@ -301,7 +282,7 @@ bool Orthorectification::execute(int type)
 
 }
 
-bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, double Geoid_Offset, int DSM_resampling)
+bool Orthorectification::process(int type, RasterElement *pDSM, GRID DSMGrid, double Geoid_Offset, int DSM_resampling)
 {
 	StepResource pStep("Orthorectification Process", "app", "B4D426EC-E06D-11E1-83C8-42E56088709B");
 	pStep->addStep("Start","app", "B4D426EC-E06D-11E1-83C8-42E56088709B");
@@ -393,17 +374,6 @@ bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, do
 	  {
       pProgress->updateProgress("Calculating result", row * 100 / N_Row, NORMAL);
 	  }
-
-	  if (isAborted())
-      {
-         std::string msg = getName() + " has been aborted.";
-         pStep->finalize(Message::Abort, msg);
-         if (pProgress != NULL)
-         {
-            pProgress->updateProgress(msg, 0, ABORT);
-         }
-         return false;
-      }
 
       if (!pDestAcc.isValid())
       {

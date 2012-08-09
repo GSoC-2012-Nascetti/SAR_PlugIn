@@ -29,16 +29,17 @@ REGISTER_PLUGIN_BASIC(OpticksSAR, Ortho_TerraSAR);
 Ortho_TerraSAR::Ortho_TerraSAR() :
    mpGui(NULL)
 {
-   setCreator("Opticks Community");
-   setVersion("Sample");
+   setCreator("Andrea Nascetti");
+   setVersion("1.0");
    setCopyright("Copyright(c) 2012, Andrea Nascetti <andreanascetti@gmail.com>");
    setProductionStatus(false);
    ViewerShell::setName("Orthorectification TerraSAR");
-   setDescription("Verifies MPR1 Requirement 180.");
+   setDescription("This plugin ia able to orthorectified TerraSAR-X imagery");
    setMenuLocation("[SAR PlugIn]\\Orthorectification\\TerraSAR-X");
    setDescriptorId("{976C6FC2-CF6C-11E1-B13F-A1E56188709B}");
    destroyAfterExecute(false);
-   setWizardSupported(false);
+   setWizardSupported(true);
+   setAbortSupported(true);
 }
 
 Ortho_TerraSAR::~Ortho_TerraSAR()

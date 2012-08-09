@@ -29,16 +29,17 @@ REGISTER_PLUGIN_BASIC(OpticksSAR, Ortho_RADARSAT);
 Ortho_RADARSAT::Ortho_RADARSAT() :
    mpGui(NULL)
 {
-   setCreator("Opticks Community");
+   setCreator("Andrea Nascetti");
    setVersion("Sample");
    setCopyright("Copyright(c) 2012, Andrea Nascetti <andreanascetti@gmail.com>");
    setProductionStatus(false);
    ViewerShell::setName("Orthorectification RADARSAT-2");
-   setDescription("Verifies MPR1 Requirement 180.");
+   setDescription("This plugin ia able to orthorectified RADARSAT-2 imagery");
    setMenuLocation("[SAR PlugIn]\\Orthorectification\\RADARSAT-2");
    setDescriptorId("{689B3124-DB38-11E1-AF0C-91426288709B}");
    destroyAfterExecute(false);
-   setWizardSupported(false);
+   setWizardSupported(true);
+   setAbortSupported(true);
 }
 
 Ortho_RADARSAT::~Ortho_RADARSAT()

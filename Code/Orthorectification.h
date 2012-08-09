@@ -10,14 +10,11 @@
 #ifndef ORTHORECTIFICATION_H
 #define ORTHORECTIFICATION_H
 
-#include "SAR_Model.h"
-#include "RasterElement.h"
-#include "GeoPoint.h"
 #include "ExecutableShell.h"
-
-
-// template<typename T>
- //void copy3(T* pData, double Value);
+#include "GeoPoint.h"
+#include "Progress.h"
+#include "RasterElement.h"
+#include "SAR_Model.h"
 
 struct GRID
 {
@@ -54,33 +51,29 @@ enum ResamplingMethod
 	AVERAGEBOX7
 };*/
 
-class Orthorectification : public ExecutableShell
+class Orthorectification
 {
-
 
 public:
 	void Start(void);
 
 	Orthorectification(RasterElement *inputRaster, SAR_Model *inputModel,GRID inputGrid,double Height);
 	~Orthorectification(void);
-	SAR_Model *Model;
 
-	virtual bool getInputSpecification(PlugInArgList*& pInArgList);
-    virtual bool getOutputSpecification(PlugInArgList*& pOutArgList);
-    virtual bool execute(int type);
-	virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
-	virtual bool Orthorectification::execute(int type, RasterElement *pDSM, GRID DSMGrid, double Geoid_Offset,int DSM_resampling=1);
+    virtual bool process(int type);
+	virtual bool process(int type, RasterElement *pDSM, GRID DSMGrid, double Geoid_Offset,int DSM_resampling=1);
 	
 private:
 
+    SAR_Model *Model;
 	RasterElement *Image;
+	Progress *pProgress;
 
 	int res_type,boxsize;
-
 	double FlatHeight;
-	// GRID EXTENSION 
 
-    GRID OrthoGrid;
+	// GRID EXTENSION 
+	GRID OrthoGrid;
 };
 
 #endif

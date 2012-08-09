@@ -10,8 +10,8 @@
 #ifndef Test_GUI_H
 #define Test_GUI_H
 
-#include "ViewerShell.h"
 #include "Ortho_GUI.h"
+#include "ViewerShell.h"
 
 class Ortho_RADARSAT : public QObject, public ViewerShell
 {

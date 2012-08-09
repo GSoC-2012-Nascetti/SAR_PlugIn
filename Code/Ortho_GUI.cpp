@@ -18,6 +18,7 @@
 #include "ModelServices.h"
 #include "Ortho_GUI.h"
 #include "Orthorectification.h"
+#include "PlugInArgList.h"
 #include "PlugInResource.h"
 #include "Progress.h"
 #include "ProgressResource.h"
@@ -298,20 +299,23 @@ void Ortho_GUI::StartOrtho()
 	ModProva = new SAR_Model(*Metadata,10);
 
 	Orthorectification ProcessOrtho(pCube, ModProva, OrthoGrid, Height->value());
-
+	
 	// RETRIVE SELECTED RESAMPLING METHOD AND EXECUTE ORTHO
 
 	int indexR = mpInterpolationList->currentIndex();
 	
 	if (mpFlatten->isChecked() ==true) 
 	{
-		VERIFYNRV(ProcessOrtho.execute(indexR));
+		VERIFYNRV(ProcessOrtho.process(indexR));
+		
+		
 	}
 	else 
 	{
 		VERIFYNRV(RetrieveDSMGrid());
-		VERIFYNRV(ProcessOrtho.execute(indexR, pDSM, DSMGrid, GeoidOffSet->value(),mpDSMInterpolationList->currentIndex()));
+		VERIFYNRV(ProcessOrtho.process(indexR, pDSM, DSMGrid, GeoidOffSet->value(),mpDSMInterpolationList->currentIndex()));
 	}
+
 
 }
 
