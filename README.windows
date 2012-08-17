@@ -1,0 +1,18 @@
+****		Building and Running SAR plug-ins		****
+
+1. Follow the instructions available at this link and install the Opticks' SDK on windows:
+http://opticks.org/docs/sdk/4.9.1/
+
+2. Download the SAR PlugIn repository as a ZIP file
+
+3. Create a new directory name:"SAR_PlugIn" at SDK_HOME\application\PlugIns\src\
+
+4. Unzip in this directory the repository files
+
+5. Open Visual Studio 2010 (any edition).
+
+6. Open the solution file  SDK_HOME\Application\SamplePlugIns.sln 
+
+7. Add the existing SAR_PlugIn.vcxproj project to the "SamplePlugIns" solution
+
+8. Build the project in your desired platform and configuration
