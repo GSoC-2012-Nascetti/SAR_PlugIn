@@ -184,6 +184,16 @@ bool Test_Update_RADARSAT2::execute(PlugInArgList* pInArgList, PlugInArgList* pO
                return false;
             }
          }
+		 else
+		 {
+			 std::string msg = "A set of GCPs must be specified.";
+             pStep->finalize(Message::Failure, msg);
+             if (pProgress != NULL)
+             {
+				 pProgress->updateProgress(msg, 0, ERRORS);
+             }
+			 return false;
+		 }
       } // End if GcpList
 
 

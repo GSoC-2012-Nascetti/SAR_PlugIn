@@ -241,15 +241,19 @@ void Ortho_GUI::init()
 
    X_Spacing->setMinimum(0);
    X_Spacing->setDecimals(3);
-   X_Spacing->setMaximum(50000000);
+   X_Spacing->setMaximum(5000);
 
    Y_Spacing->setMinimum(0);
    Y_Spacing->setDecimals(3);
-   Y_Spacing->setMaximum(50000000);
+   Y_Spacing->setMaximum(5000);
 
    Height->setMinimum(-100);
    Height->setDecimals(4);
    Height->setMaximum(10000);
+
+   GeoidOffSet->setMinimum(-150.00);
+   GeoidOffSet->setDecimals(3);
+   GeoidOffSet->setMaximum(+150.00);
 
    mpFlatten->setChecked(true);
 
@@ -407,7 +411,7 @@ void Ortho_GUI::CheckModel()
          {
             std::string strAoi = aoi.toStdString();
             for (std::vector<DataElement*>::iterator it = pGcpLists.begin(); it != pGcpLists.end(); ++it)
-        {
+            {
                if ((*it)->getName() == strAoi)
                {
                   GCPs = static_cast<GcpList*>(*it);
@@ -417,13 +421,19 @@ void Ortho_GUI::CheckModel()
             if (GCPs == NULL)
             {
                std::string msg = "Invalid GCPList.";
-             //  pStep->finalize(Message::Failure, msg);
-
                pProgress->updateProgress(msg, 0, ERRORS);
-
                return;
             }
          }
+		 else
+		 {
+			 std::string msg = "A set of GCPs must be specified.";
+			 if (pProgress.get() != NULL)
+             {
+				 pProgress->updateProgress(msg, 0, ERRORS);
+             }
+			 return;
+		 }
 	} // End if GcpList
    
   	
