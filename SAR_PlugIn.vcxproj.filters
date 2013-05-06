@@ -60,6 +60,12 @@
       <Filter>Moc Files</Filter>
     </ClCompile>
     <ClCompile Include="Code\TestSAR.cpp" />
+    <ClCompile Include="Code\exportGCP.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\importTP.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\xmlreaderSAR.h">
@@ -90,6 +96,12 @@
       <Filter>SAR Orientation Model</Filter>
     </ClInclude>
     <ClInclude Include="Code\TestSAR.h" />
+    <ClInclude Include="Code\exportGCP.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\importTP.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="SAR Orientation Model">
@@ -106,6 +118,9 @@
     </Filter>
     <Filter Include="Metadata Reader">
       <UniqueIdentifier>{17ae096f-82c8-4b61-b714-853de7620434}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tools">
+      <UniqueIdentifier>{b80a858c-3869-4479-8097-548feacf5a1e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

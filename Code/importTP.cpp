@@ -22,6 +22,7 @@
 #include "GcpList.h"
 #include "GcpLayer.h"
 #include "GeoPoint.h"
+#include "importTP.h"
 #include "MessageLogResource.h"
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
@@ -31,18 +32,16 @@
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
-#include "SAR_Model.h"
-#include "stdlib.h"
-#include <stdio.h>
 #include "StringUtilities.h"
 #include "switchOnEncoding.h"
-#include "exportGCP.h"
-#include "TerraSAR_Metadata.h"
 #include "TypeConverter.h"
 #include "UtilityServices.h"
 
 #include <QtCore/QStringList>
 #include <QtGui/QInputDialog>
+
+#include "boost/algorithm/string/split.hpp"
+
 
 #include "boost/accumulators/accumulators.hpp"
 #include "boost/accumulators/statistics/stats.hpp"
@@ -50,38 +49,36 @@
 #include "boost/accumulators/statistics/variance.hpp"
 #include "boost/lexical_cast.hpp"
 
-
-//#include "opencv\cxcore.h"
-//#include "opencv2\calib3d\calib3d.hpp"
-
+#include "stdlib.h"
+#include <stdio.h>
 #include <fstream>
+
+using namespace std;
 using namespace boost::accumulators;
 
-REGISTER_PLUGIN_BASIC(OpticksSAR, exportGCP);
+REGISTER_PLUGIN_BASIC(OpticksSAR, importTP);
 
-exportGCP::exportGCP(void)
+importTP::importTP(void)
 {
-   setDescriptorId("{0FD5941E-0BE2-11E2-B828-99A56188709B}");
-   setName("exportGCP");
-   setDescription("Export GCPs data");
+   setDescriptorId("{2657F696-147F-11E2-B196-8EC66088709B}");
+   setName("importTP");
+   setDescription("Import TPsdata");
    setCreator("Andrea Nascetti");
    setVersion("Sample");
    setCopyright("Copyright(c) 2012, Andrea Nascetti <andreanascetti@gmail.com>");
    setProductionStatus(false);
    setType("Sample");
    setSubtype("Statistics");
-   setMenuLocation("[SAR PlugIn]/Tools/Export GCPs");
+   setMenuLocation("[SAR PlugIn]/Tools/Import TPs");
    setAbortSupported(true);
 }
 
-exportGCP::~exportGCP(void)
+importTP::~importTP(void)
 {
 }
 
-bool exportGCP::getInputSpecification(PlugInArgList* &pInArgList)
+bool importTP::getInputSpecification(PlugInArgList* &pInArgList)
 {
-	//cv::Mat provaMatrice = cv::Mat(1000,1000,CV_16S);
-
    pInArgList = Service<PlugInManagerServices>()->getPlugInArgList();
    VERIFY(pInArgList != NULL);
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
@@ -95,7 +92,7 @@ bool exportGCP::getInputSpecification(PlugInArgList* &pInArgList)
    return true;
 }
 
-bool exportGCP::getOutputSpecification(PlugInArgList*& pOutArgList)
+bool importTP::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
    pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList();
    VERIFY(pOutArgList != NULL);
@@ -104,7 +101,7 @@ bool exportGCP::getOutputSpecification(PlugInArgList*& pOutArgList)
    return true;
 }
 
-bool exportGCP::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
+bool importTP::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
   StepResource pStep("Tutorial CEO", "app", "0FD3C564-041D-4f8f-BBF8-96A7A165AB61");
 
@@ -193,70 +190,34 @@ bool exportGCP::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 	
 	// UPDATE GCPs HEIGHT INFORMATION AND SWITCH Lat&Lon COORDINATE FOR CORRECT VISUALIZAZION IN THE GCPs EDITOR
 
-    std::list<GcpPoint> Punti = GCPs->getSelectedPoints();
-     
-
-	int N=Punti.size();
 	int n=0;
-	//double Lat, Lon;
 
-	ofstream file_out;
-	file_out.open("C:\\GCPs_Stampa2.txt");
-	file_out.precision(15);
+	FILE *file_in;
+	file_in = fopen("C:/input.txt","rt");
 
-	if ( ! file_out.is_open() ) {  
-	   std::string msg = "Failed to open file";
-       pProgress->updateProgress(msg, 0, ERRORS);
-    }
+	double CoordI=0, CoordJ=0;
 
-	accumulator_set<double, stats<tag::mean, tag::variance> > accX, accY;
-
-    file_out <<"Lon		Lat		Est		Nord"<<endl;
-
-	std::list<GcpPoint>::iterator pList;
-	for (pList = Punti.begin(); pList != Punti.end(); pList++)
+	while (! feof(file_in))
 	{
-		UtmPoint puntoUTM = UtmPoint(pList->mCoordinate);
-		file_out <<pList->mCoordinate.mX<<"	"<<pList->mCoordinate.mY<<"	"<<puntoUTM.getEasting()<<"	"<<puntoUTM.getNorthing()<<endl;
 
-/*		if(pList->mPixel.mX<Prova_metadata.Width && pList->mPixel.mY<Prova_metadata.Height)	
-		{
-			Lon = pList->mCoordinate.mX;
-			Lat = pList->mCoordinate.mY;
-			
-			Punto = ModProva.SAR_GroundToSlant(pList->mCoordinate.mX,pList->mCoordinate.mY,pList->mCoordinate.mZ); 
-			pList->mRmsError.mX = pList->mPixel.mX -Punto.I;
-			pList->mRmsError.mY = pList->mPixel.mY -Punto.J;
-			accX(pList->mRmsError.mX);
-			accY(pList->mRmsError.mY);
+		fscanf(file_in,"%lf %lf",&CoordI,&CoordJ);
 
-			pList->mCoordinate.mX = Lat;
-			pList->mCoordinate.mY = Lon;
+		GcpPoint Punto;
 
-		}
-		else
-		{
-			Lon = pList->mCoordinate.mX;
-			Lat = pList->mCoordinate.mY;
-			pList->mRmsError.mX = -9999;
-			pList->mRmsError.mY = -9999;
-			pList->mCoordinate.mX = Lat;
-			pList->mCoordinate.mY = Lon;
-		}
+		Punto.mPixel.mX = CoordI;
+		
+		Punto.mPixel.mY = CoordJ;
 
-		if (pProgress != NULL)
-		{
-         pProgress->updateProgress("Calculating statistics", int(100*n/N), NORMAL);
-		}
-		n++;
-*/
+		GCPs->addPoint(Punto);
+
+		pProgress->updateProgress("Calculating statistics", int(n), NORMAL);
 	}
 
-	file_out.close();
-
+	fclose(file_in);
+	
 	if (pProgress != NULL)
 	{
-		std::string msg = "GCPs Export Complete" ;
+		std::string msg = "GCPs Import Complete" ;
 				  						                      
 		pProgress->updateProgress(msg, 100, NORMAL);
 	}
