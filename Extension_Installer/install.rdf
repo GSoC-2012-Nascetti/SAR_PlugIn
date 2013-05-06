@@ -19,16 +19,16 @@
     <aebl:targetApplication>
       <rdf:Description>
         <aebl:id>opticks@ballforge.net</aebl:id>
-        <aebl:minVersion>4.8.0</aebl:minVersion>
-        <aebl:maxVersion>4.8.*</aebl:maxVersion>
+        <aebl:minVersion>4.11.0</aebl:minVersion>
+        <aebl:maxVersion>4.11.*</aebl:maxVersion>
       </rdf:Description>
     </aebl:targetApplication>
 
     <aebl:targetPlatform>win32-x86-msvc10.0-release</aebl:targetPlatform>
     
-<aebl:targetPlatform>win32-x86-msvc10.0-debug</aebl:targetPlatform>
+    <aebl:targetPlatform>win32-x86-msvc10.0-debug</aebl:targetPlatform>
     
-<aebl:targetPlatform>win64-x86-msvc10.0-debug</aebl:targetPlatform>
+    <aebl:targetPlatform>win64-x86-msvc10.0-debug</aebl:targetPlatform>
 
     <aebl:targetPlatform>win64-x86-msvc10.0-release</aebl:targetPlatform>    
 
