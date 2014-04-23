@@ -66,6 +66,27 @@
     <ClCompile Include="Code\importTP.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Simulation_GUI.cpp">
+      <Filter>Simulator</Filter>
+    </ClCompile>
+    <ClCompile Include="Moc Files\moc_Simulation_GUI.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\SAR_Simulator_R2.cpp">
+      <Filter>Simulator</Filter>
+    </ClCompile>
+    <ClCompile Include="Moc Files\moc_SAR_Simulator_R2.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\SAR_Simulator_TSX.cpp">
+      <Filter>Simulator</Filter>
+    </ClCompile>
+    <ClCompile Include="Moc Files\moc_SAR_Simulator_TSX.cpp">
+      <Filter>Moc Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\SAR_Simulator_processor.cpp">
+      <Filter>Simulator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\xmlreaderSAR.h">
@@ -122,6 +143,9 @@
     <Filter Include="Tools">
       <UniqueIdentifier>{b80a858c-3869-4479-8097-548feacf5a1e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Simulator">
+      <UniqueIdentifier>{4abc9671-dad3-415a-98e1-3d01a875c9de}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Code\StereoMeasurement.h">
@@ -138,6 +162,18 @@
     </CustomBuild>
     <CustomBuild Include="Code\Ortho_TerraSAR.h">
       <Filter>Orthorectification</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Code\Simulation_GUI.h">
+      <Filter>Simulator</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Code\SAR_Simulator_R2.h">
+      <Filter>Simulator</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Code\SAR_Simulator_TSX.h">
+      <Filter>Simulator</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Code\SAR_Simulator_processor.h">
+      <Filter>Simulator</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

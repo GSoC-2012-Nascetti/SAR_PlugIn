@@ -150,8 +150,12 @@
     <ClCompile Include="Code\ModuleManager.cpp" />
     <ClCompile Include="Code\Orthorectification.cpp" />
     <ClCompile Include="Code\Ortho_GUI.cpp" />
+    <ClCompile Include="Code\Simulation_GUI.cpp" />
+    <ClCompile Include="Code\SAR_Simulator_processor.cpp" />
     <ClCompile Include="Code\Ortho_RADARSAT.cpp" />
     <ClCompile Include="Code\Ortho_TerraSAR.cpp" />
+    <ClCompile Include="Code\SAR_Simulator_R2.cpp" />
+    <ClCompile Include="Code\SAR_Simulator_TSX.cpp" />
     <ClCompile Include="Code\RADARSAT_Metadata.cpp" />
     <ClCompile Include="Code\StereoMeasurement_GUI.cpp" />
     <ClCompile Include="Code\SAR_Metadata.cpp" />
@@ -166,6 +170,9 @@
     <ClCompile Include="Moc Files\moc_Ortho_GUI.cpp" />
     <ClCompile Include="Moc Files\moc_Ortho_RADARSAT.cpp" />
     <ClCompile Include="Moc Files\moc_Ortho_TerraSAR.cpp" />
+    <ClCompile Include="Moc Files\moc_SAR_Simulator_R2.cpp" />
+    <ClCompile Include="Moc Files\moc_SAR_Simulator_TSX.cpp" />
+    <ClCompile Include="Moc Files\moc_Simulation_GUI.cpp" />
     <ClCompile Include="Moc Files\moc_StereoMeasurement.cpp" />
     <ClCompile Include="Moc Files\moc_StereoMeasurement_GUI.cpp" />
   </ItemGroup>
@@ -187,6 +194,26 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+    </CustomBuild>
+    <CustomBuild Include="Code\Simulation_GUI.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="Code\SAR_Simulator_processor.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="Code\SAR_Simulator_R2.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="Code\SAR_Simulator_TSX.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="Code\RADARSAT_Metadata.h" />
     <CustomBuild Include="Code\StereoMeasurement_GUI.h">
