@@ -35,5 +35,8 @@ public:
 	// ANNOTATION CORRECTION //
 	double RangeCoeff1,RangeCoeff2,AzimuthCoeff;
 
+	// GRID TIME //
+	double Grid_Azimuth_Time, Grid_Range_Time;
+	int Grid_N, Grid_N_Azimuth, Grid_N_Range;
 };
 

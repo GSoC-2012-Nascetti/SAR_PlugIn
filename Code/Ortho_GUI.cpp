@@ -667,19 +667,27 @@ bool Ortho_GUI::RetrieveDSMGrid()
 					  "Lon Min: " + StringUtilities::toDisplayString(DSMGrid.Lon_Min) + "\n"
 					  "Lon Max: " + StringUtilities::toDisplayString(DSMGrid.Lon_Max) + "\n");
 
-	if ((DSMGrid.Lat_Max < OrthoGrid.Lat_Max) || (DSMGrid.Lat_Min > OrthoGrid.Lat_Min)) 
-	{
-		QMessageBox::information(this, QString::fromStdString("Error Information"), 
-		               QString::fromStdString(msg));
-	    return false;
-	}
-	
-	if ((DSMGrid.Lon_Max < OrthoGrid.Lon_Max) || (DSMGrid.Lon_Min > OrthoGrid.Lon_Min)) 
-	{
-	    QMessageBox::information(this, QString::fromStdString("Error Information"), 
-		               QString::fromStdString(msg));
-	    return false;	
-	}
+
+	if (DSMGrid.Lat_Max < OrthoGrid.Lat_Max) OrthoGrid.Lat_Max = DSMGrid.Lat_Max;
+	if (DSMGrid.Lat_Min > OrthoGrid.Lat_Min) OrthoGrid.Lat_Min = DSMGrid.Lat_Min;
+
+	if (DSMGrid.Lon_Max < OrthoGrid.Lon_Max) OrthoGrid.Lon_Max = DSMGrid.Lon_Max;
+	if (DSMGrid.Lon_Min > OrthoGrid.Lon_Min) OrthoGrid.Lon_Min = DSMGrid.Lon_Min;
+
+
+	//if ((DSMGrid.Lat_Max < OrthoGrid.Lat_Max) || (DSMGrid.Lat_Min > OrthoGrid.Lat_Min)) 
+	//{
+	//	QMessageBox::information(this, QString::fromStdString("Error Information"), 
+	//	               QString::fromStdString(msg));
+	//    return false;
+	//}
+	//
+	//if ((DSMGrid.Lon_Max < OrthoGrid.Lon_Max) || (DSMGrid.Lon_Min > OrthoGrid.Lon_Min)) 
+	//{
+	//    QMessageBox::information(this, QString::fromStdString("Error Information"), 
+	//	               QString::fromStdString(msg));
+	//    return false;	
+	//}
 
 
 	return true;

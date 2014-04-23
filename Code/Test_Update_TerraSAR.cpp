@@ -203,11 +203,11 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
      
 	Punti = Prova_metadata.UpdateGCP(Punti, path, pProgress);
 
-	SAR_Model ModProva(Prova_metadata,100);
+	SAR_Model ModProva(Prova_metadata,1000);
 
 	P_COORD Punto;
 	int N=Punti.size();
-	int n=0;
+	int n=0, indexP=0;
 	double Lat, Lon;
 
 	accumulator_set<double, stats<tag::mean, tag::variance> > accX, accY;
@@ -221,8 +221,15 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 			Lat = pList->mCoordinate.mY;
 			
 			Punto = ModProva.SAR_GroundToSlant(pList->mCoordinate.mX,pList->mCoordinate.mY,pList->mCoordinate.mZ); 
-			pList->mRmsError.mX = pList->mPixel.mX -Punto.I;
-			pList->mRmsError.mY = pList->mPixel.mY -Punto.J;
+			//pList->mRmsError.mX = pList->mPixel.mX -Punto.I;
+			//pList->mRmsError.mY = pList->mPixel.mY -Punto.J;
+
+			pList->mPixel.mX = (Prova_metadata.Grid_Range_Time/Prova_metadata.RowSpacing)*(indexP-int(indexP/Prova_metadata.Grid_N_Range)*Prova_metadata.Grid_N_Range);
+			pList->mRmsError.mX = (Prova_metadata.Grid_Range_Time/Prova_metadata.RowSpacing)*(indexP-int(indexP/Prova_metadata.Grid_N_Range)*Prova_metadata.Grid_N_Range) -Punto.I;
+
+			pList->mPixel.mY = (Prova_metadata.Grid_Azimuth_Time*Prova_metadata.PRF)*int(indexP/Prova_metadata.Grid_N_Range);
+			pList->mRmsError.mY = (Prova_metadata.Grid_Azimuth_Time*Prova_metadata.PRF)*int(indexP/Prova_metadata.Grid_N_Range) - Punto.J;
+			
 			accX(pList->mRmsError.mX);
 			accY(pList->mRmsError.mY);
 
@@ -245,6 +252,7 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
          pProgress->updateProgress("Calculating statistics", int(100*n/N), NORMAL);
 		}
 		n++;
+		indexP++;
 	}
 
 	 double meanX = mean(accX);

@@ -206,7 +206,7 @@ P_COORD SAR_Model::SAR_GroundToSlant(double Lon,double Lat, double H)
 	Index[2]= PrecisionIndex*Metadata.Height-1;
 	Index[1]= int(((Index[0]+Index[2])/2));
 
-	while ( (fabs((T_Angles[1]-Pi_Greco)/2) > 0.00000001) && (Index[0] != Index[1])) 
+	while ( (fabs((T_Angles[1]-Pi_Greco)/2) > 0.0000000001) && (Index[0] != Index[1])) 
 	{
 		for (int i=0; i<=2;i++)
 		{				

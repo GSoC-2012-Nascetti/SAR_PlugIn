@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'StereoMeasurement_GUI.h'
 **
-** Created: Thu 9. Aug 12:04:42 2012
+** Created: Wed 9. Apr 19:15:10 2014
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_StereoMeasurement_GUI[] = {
        5,       // revision
        0,       // classname
        0,    0, // classinfo
-       2,   14, // methods
+       3,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -33,13 +33,14 @@ static const uint qt_meta_data_StereoMeasurement_GUI[] = {
  // slots: signature, parameters, type, tag, flags
       23,   22,   22,   22, 0x0a,
       40,   22,   22,   22, 0x0a,
+      61,   22,   22,   22, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_StereoMeasurement_GUI[] = {
     "StereoMeasurement_GUI\0\0GetMapLocation()\0"
-    "GetPixelLocation(bool)\0"
+    "GetMapFileLocation()\0GetPixelLocation(bool)\0"
 };
 
 const QMetaObject StereoMeasurement_GUI::staticMetaObject = {
@@ -72,10 +73,11 @@ int StereoMeasurement_GUI::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
         case 0: GetMapLocation(); break;
-        case 1: GetPixelLocation((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 1: GetMapFileLocation(); break;
+        case 2: GetPixelLocation((*reinterpret_cast< bool(*)>(_a[1]))); break;
         default: ;
         }
-        _id -= 2;
+        _id -= 3;
     }
     return _id;
 }

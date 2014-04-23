@@ -38,6 +38,7 @@ protected:
 public slots:
 
 	void GetMapLocation();
+	void GetMapFileLocation();
 	void GetPixelLocation(bool);
 
 private:
@@ -48,6 +49,7 @@ private:
    QPushButton* mpApplyButton;
    QPushButton* mpGenerateViewButton;
    QPushButton* mpGetMapLocation;
+   QPushButton* mpGetMapFileLocation;
 
    QComboBox* mpCubeListCombo;
    QComboBox* mpCubeListCombo_slave;

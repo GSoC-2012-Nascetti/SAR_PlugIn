@@ -222,7 +222,7 @@ bool TerraSAR_Metadata::ReadFile(std::string path)
 		VERIFY(pResult != NULL);
 	RangeCoeff2 = static_cast<double>(pResult->getNumberValue());
 
-	RangeD0 = (RangeD0-(RangeCoeff1+RangeCoeff2))*299792.460*1000/2;
+	RangeD0 = (RangeD0-(RangeCoeff1+RangeCoeff2))*299792.458*1000/2.0;
 
 	current = "xs:double(//signalPropagationEffects/azimuthShift/coefficient/text())";
 		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
@@ -231,6 +231,33 @@ bool TerraSAR_Metadata::ReadFile(std::string path)
 	AzimutT0 = AzimutT0 - AzimuthCoeff;  //86400;
 	AzimutTi = 1/PRF;
 
+
+	// READ GRID SPACING RANGE AND AZIMUTH //
+
+	current = "xs:double(//spacingOfGridPoints/azimuth/text())";
+		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		VERIFY(pResult != NULL);
+		Grid_Azimuth_Time = static_cast<double>(pResult->getNumberValue());
+
+	current = "xs:double(//spacingOfGridPoints/range/text())";
+		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		VERIFY(pResult != NULL);
+		Grid_Range_Time = static_cast<double>(pResult->getNumberValue());
+
+	current = "xs:double(//numberOfGridPoints/total/text())";
+		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		VERIFY(pResult != NULL);
+		Grid_N = static_cast<int>(pResult->getNumberValue());
+    
+	current = "xs:double(//numberOfGridPoints/azimuth/text())";
+		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		VERIFY(pResult != NULL);
+		Grid_N_Azimuth = static_cast<int>(pResult->getNumberValue());
+
+	current = "xs:double(//numberOfGridPoints/range/text())";
+		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		VERIFY(pResult != NULL);
+		Grid_N_Range = static_cast<int>(pResult->getNumberValue());
 	return true;
 }
 
@@ -303,7 +330,11 @@ void TerraSAR_Metadata::UpdateMetadata(DynamicObject* DynamicMetadata)
 	DynamicMetadata->setAttributeByPath("SAR METADATA/ANNOTATION CORRECTION /Range/Atm_Corr",RangeCoeff1);
 	DynamicMetadata->setAttributeByPath("SAR METADATA/ANNOTATION CORRECTION /Range/Iono_Corr",RangeCoeff2);
 	DynamicMetadata->setAttributeByPath("SAR METADATA/ANNOTATION CORRECTION /Azimuth/Shift_Corr",AzimuthCoeff);
-
+	DynamicMetadata->setAttributeByPath("SAR METADATA/TP GRID/Azimuth Spacing",Grid_Azimuth_Time);
+	DynamicMetadata->setAttributeByPath("SAR METADATA/TP GRID/Range Spacing",Grid_Range_Time);
+	DynamicMetadata->setAttributeByPath("SAR METADATA/TP GRID/Number of point",Grid_N);
+	DynamicMetadata->setAttributeByPath("SAR METADATA/TP GRID/N Azimuth",Grid_N_Azimuth);
+	DynamicMetadata->setAttributeByPath("SAR METADATA/TP GRID/N Range",Grid_N_Range);
 }
 
 std::list<GcpPoint> TerraSAR_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, std::string path, Progress *pProgress)

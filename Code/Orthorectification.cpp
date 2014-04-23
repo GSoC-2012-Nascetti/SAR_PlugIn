@@ -72,7 +72,7 @@ double bilinear_height(DataAccessor pSrcAcc, double I, double J)
 namespace
 {  
    template<typename T> 
-   void copypixel3(T* pData, DataAccessor pSrcAcc, int I, int J, int boxsize)
+   void copypixel3(T* pData, DataAccessor pSrcAcc, int I, int J, int boxsize, double height)
    {
 	  double pixel=0;
 	  
@@ -84,6 +84,7 @@ namespace
 	  }
 
       *pData = static_cast<T>((pixel/((2*boxsize+1)*3.0))); 
+	 //   *pData = static_cast<T>(height);
    }
 };
 
@@ -203,7 +204,7 @@ bool Orthorectification::process(int type)
 
 		  if ((NodeImage.I>1 && NodeImage.I< Model->Metadata.Width-1) && (NodeImage.J>1 && NodeImage.J< Model->Metadata.Height-1))
 		  {
-			switchOnEncoding(pResultDesc->getDataType(), copypixel3, pDestAcc->getColumn(), pSrcAcc, int(NodeImage.I), int(NodeImage.J),boxsize);	
+			switchOnEncoding(pResultDesc->getDataType(), copypixel3, pDestAcc->getColumn(), pSrcAcc, int(NodeImage.I), int(NodeImage.J),boxsize, 0.0000);	
 		  }		  
 		  pDestAcc->nextColumn();
 	  }
@@ -405,7 +406,7 @@ bool Orthorectification::process(int type, RasterElement *pDSM, GRID DSMGrid, do
 
 		  if ((NodeImage.I>1 && NodeImage.I< Model->Metadata.Width-1) && (NodeImage.J>1 && NodeImage.J< Model->Metadata.Height-1))
 		  {
-			switchOnEncoding(pResultDesc->getDataType(), copypixel3, pDestAcc->getColumn(), pSrcAcc, int(NodeImage.I), int(NodeImage.J),boxsize);		
+			switchOnEncoding(pResultDesc->getDataType(), copypixel3, pDestAcc->getColumn(), pSrcAcc, int(NodeImage.I), int(NodeImage.J),boxsize, H_IJ);		
 		  }		  
 		  pDestAcc->nextColumn();
       }

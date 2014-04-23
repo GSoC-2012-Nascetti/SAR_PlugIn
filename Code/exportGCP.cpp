@@ -211,13 +211,13 @@ bool exportGCP::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
 	accumulator_set<double, stats<tag::mean, tag::variance> > accX, accY;
 
-    file_out <<"Lon		Lat		Est		Nord"<<endl;
+    file_out <<"Lon		Lat		Est		Nord	I	J	DI		DJ"<<endl;
 
 	std::list<GcpPoint>::iterator pList;
 	for (pList = Punti.begin(); pList != Punti.end(); pList++)
 	{
 		UtmPoint puntoUTM = UtmPoint(pList->mCoordinate);
-		file_out <<pList->mCoordinate.mX<<"	"<<pList->mCoordinate.mY<<"	"<<puntoUTM.getEasting()<<"	"<<puntoUTM.getNorthing()<<endl;
+		file_out <<pList->mCoordinate.mX<<"	"<<pList->mCoordinate.mY<<"	"<<puntoUTM.getEasting()<<"	"<<puntoUTM.getNorthing()<<" "<<pList->mPixel.mX<<" "<<pList->mPixel.mY<<" "<<pList->mRmsError.mX<<" "<<pList->mRmsError.mY <<endl;
 
 /*		if(pList->mPixel.mX<Prova_metadata.Width && pList->mPixel.mY<Prova_metadata.Height)	
 		{
