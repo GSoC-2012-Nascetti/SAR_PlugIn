@@ -51,9 +51,6 @@
 #include "boost/lexical_cast.hpp"
 
 
-//#include "opencv\cxcore.h"
-//#include "opencv2\calib3d\calib3d.hpp"
-
 #include <fstream>
 using namespace boost::accumulators;
 
@@ -224,7 +221,7 @@ bool exportGCP::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 			Lon = pList->mCoordinate.mX;
 			Lat = pList->mCoordinate.mY;
 			
-			Punto = ModProva.SAR_GroundToSlant(pList->mCoordinate.mX,pList->mCoordinate.mY,pList->mCoordinate.mZ); 
+			Punto = ModProva.SAR_GroundToImage(pList->mCoordinate.mX,pList->mCoordinate.mY,pList->mCoordinate.mZ); 
 			pList->mRmsError.mX = pList->mPixel.mX -Punto.I;
 			pList->mRmsError.mY = pList->mPixel.mY -Punto.J;
 			accX(pList->mRmsError.mX);

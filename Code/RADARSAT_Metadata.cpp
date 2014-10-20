@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <boost\algorithm\string.hpp>
 using namespace std;
 
 XERCES_CPP_NAMESPACE_USE
@@ -272,7 +273,32 @@ bool RADARSAT_Metadata::ReadFile(std::string path)
 		VERIFY(pResult != NULL);
 		Date = XMLString::transcode(pResult->getStringValue());
 		StateVectors[n-1].DOY = DATEtoDOY(Date);
+
+
+	// RETRIEVE GROUND-RANGE INFORMATION
+
+		current = "xs:string(//slantRangeToGroundRange/groundRangeOrigin/text())";
+		pResult = xml.queryNamespace(current,DefaultNamespace, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		VERIFY(pResult != NULL);
+		GroundRange.G0 = static_cast<double>(pResult->getNumberValue());
+
+		current = "xs:string(//slantRangeToGroundRange/groundToSlantRangeCoefficients/text())";
+		pResult = xml.queryNamespace(current,DefaultNamespace, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		VERIFY(pResult != NULL);
+		std::string s_coeff = XMLString::transcode(pResult->getStringValue());
+		
+		std::vector<std::string> coeff;
+		boost::split(coeff, s_coeff, boost::is_any_of(" "));
+
+		GroundRange.S0 = (double)atof(coeff[0].c_str());
+		GroundRange.S1 = (double)atof(coeff[1].c_str());
+		GroundRange.S2 = (double)atof(coeff[2].c_str());
+		GroundRange.S3 = (double)atof(coeff[3].c_str());
+		GroundRange.S4 = (double)atof(coeff[4].c_str());
+		GroundRange.S5 = (double)atof(coeff[5].c_str());
 	}
+
+
 
 	return true;
 }
@@ -296,6 +322,15 @@ void RADARSAT_Metadata::UpdateMetadata(DynamicObject* DynamicMetadata)
 	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Azimuth T0/",AzimutT0);
 	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Azimuth Ti/",AzimutTi);
 
+
+	// Ground Range Informtation
+	DynamicMetadata->setAttributeByPath("SAR METADATA/GROUND-RANGE/G0/",GroundRange.G0);
+	DynamicMetadata->setAttributeByPath("SAR METADATA/GROUND-RANGE/S0/",GroundRange.S0);
+	DynamicMetadata->setAttributeByPath("SAR METADATA/GROUND-RANGE/S1/",GroundRange.S1);
+	DynamicMetadata->setAttributeByPath("SAR METADATA/GROUND-RANGE/S2/",GroundRange.S2);
+	DynamicMetadata->setAttributeByPath("SAR METADATA/GROUND-RANGE/S3/",GroundRange.S3);
+	DynamicMetadata->setAttributeByPath("SAR METADATA/GROUND-RANGE/S4/",GroundRange.S4);
+	DynamicMetadata->setAttributeByPath("SAR METADATA/GROUND-RANGE/S5/",GroundRange.S5);
 
 	// UPDATE CORNER COORDINATE //
 	std::string current;

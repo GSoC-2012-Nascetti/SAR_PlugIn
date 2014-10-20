@@ -200,7 +200,7 @@ bool Orthorectification::process(int type)
 		  NodeLat = OrthoGrid.Lat_Min+row*OrthoGrid.Lat_Step;
 		  NodeLon = OrthoGrid.Lon_Min+col*OrthoGrid.Lon_Step;
 
-		  P_COORD NodeImage = Model->SAR_GroundToSlant(NodeLon,NodeLat,FlatHeight);
+		  P_COORD NodeImage = Model->SAR_GroundToImage(NodeLon,NodeLat,FlatHeight);
 
 		  if ((NodeImage.I>1 && NodeImage.I< Model->Metadata.Width-1) && (NodeImage.J>1 && NodeImage.J< Model->Metadata.Height-1))
 		  {
@@ -402,7 +402,7 @@ bool Orthorectification::process(int type, RasterElement *pDSM, GRID DSMGrid, do
 		  H_IJ = bilinear_height(pDSMAcc,DSM_I,DSM_J);
 		  }
 
-		  P_COORD NodeImage = Model->SAR_GroundToSlant(NodeLon,NodeLat,H_IJ+Geoid_Offset);
+		  P_COORD NodeImage = Model->SAR_GroundToImage(NodeLon,NodeLat,H_IJ+Geoid_Offset);
 
 		  if ((NodeImage.I>1 && NodeImage.I< Model->Metadata.Width-1) && (NodeImage.J>1 && NodeImage.J< Model->Metadata.Height-1))
 		  {

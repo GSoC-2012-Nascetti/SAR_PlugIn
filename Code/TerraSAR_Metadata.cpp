@@ -39,7 +39,7 @@ bool TerraSAR_Metadata::ReadFile(std::string path)
       return false;
    }
 
-   std::string current, Date;
+   std::string current; //, Date;
 
    // CHECK IF IS A TerraSAR-X Mission //
    XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* pResult =
@@ -124,6 +124,10 @@ bool TerraSAR_Metadata::ReadFile(std::string path)
 						 XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
 	CornerCoordinate[0].Height = static_cast<double>(pResult->getNumberValue());
 		
+	Min_IncidenceAngle = 90.0;
+	Max_IncidenceAngle = 0.0;
+	double current_angle = 0.0;
+
 	for (int n=1; n<5; n++ )
 	{
 		std::stringstream num,num2;
@@ -149,6 +153,13 @@ bool TerraSAR_Metadata::ReadFile(std::string path)
 		CornerCoordinate[n].J = pResult->getIntegerValue();
 
 		CornerCoordinate[n].Height = CornerCoordinate[0].Height;
+
+		current = "xs:double(//productInfo/sceneInfo/sceneCornerCoord["+num.str()+"]/incidenceAngle/text())";
+		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		VERIFY(pResult != NULL);
+		current_angle = static_cast<double>(pResult->getNumberValue());
+		if(current_angle < Min_IncidenceAngle) Min_IncidenceAngle = current_angle;
+		if(current_angle > Max_IncidenceAngle) Max_IncidenceAngle = current_angle; 
 	}
 	
 	// RETRIEVE ORBIT STATE VECTORS //
@@ -222,6 +233,7 @@ bool TerraSAR_Metadata::ReadFile(std::string path)
 		VERIFY(pResult != NULL);
 	RangeCoeff2 = static_cast<double>(pResult->getNumberValue());
 
+	RangeD0_Free = (RangeD0)*299792.458*1000/2.0;
 	RangeD0 = (RangeD0-(RangeCoeff1+RangeCoeff2))*299792.458*1000/2.0;
 
 	current = "xs:double(//signalPropagationEffects/azimuthShift/coefficient/text())";
@@ -229,7 +241,7 @@ bool TerraSAR_Metadata::ReadFile(std::string path)
 		VERIFY(pResult != NULL);
 	AzimuthCoeff = static_cast<double>(pResult->getNumberValue());
 	AzimutT0 = AzimutT0 - AzimuthCoeff;  //86400;
-	AzimutTi = 1/PRF;
+	AzimutTi = 1./PRF;
 
 
 	// READ GRID SPACING RANGE AND AZIMUTH //
@@ -268,17 +280,21 @@ void TerraSAR_Metadata::UpdateMetadata(DynamicObject* DynamicMetadata)
 	DynamicMetadata->setAttributeByPath("SAR METADATA/ACQUISITION INFO/Projection/", Projection);  
 	DynamicMetadata->setAttributeByPath("SAR METADATA/ACQUISITION INFO/Orbit Direction/", Orbit);
 	DynamicMetadata->setAttributeByPath("SAR METADATA/ACQUISITION INFO/Side Looking/", SideLooking);  
-	
+	DynamicMetadata->setAttributeByPath("SAR METADATA/ACQUISITION INFO/Date/", Date);
+
 	// UPDATE RASTER DATA //
 	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Number of Rows/",Height);
 	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Number of Columns/",Width);
 	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Row Spacing/",RowSpacing);
 	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Columns Spacing/",ColumnSpacing);
 	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/PRF/",PRF);
-	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Range D0/",RangeD0); 
+	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Range D0/",RangeD0);
+	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Range D0 Free/",RangeD0_Free);
 	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Range Di/",RangeDi);
 	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Azimuth T0/",AzimutT0);
 	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Azimuth Ti/",AzimutTi);	
+	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Min Incidence Angle/",Min_IncidenceAngle);
+	DynamicMetadata->setAttributeByPath("SAR METADATA/IMAGE RASTER INFO/Max Incidence Angle/",Max_IncidenceAngle);	
 
 	// UPDATE CORNER COORDINATE //
 	DynamicMetadata->setAttributeByPath("SAR METADATA/CORNER COORDIATE/Center/Lat",CornerCoordinate[0].Latitude);

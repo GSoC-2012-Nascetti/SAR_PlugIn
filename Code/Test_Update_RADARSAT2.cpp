@@ -32,6 +32,8 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "SAR_Model.h"
+#include "SAR_Ground_Model.h"
+#include "SAR_Slant_Model.h"
 #include "StringUtilities.h"
 #include "switchOnEncoding.h"
 #include "Test_Update_RADARSAT2.h"
@@ -203,7 +205,17 @@ bool Test_Update_RADARSAT2::execute(PlugInArgList* pInArgList, PlugInArgList* pO
      
 	Punti = Prova_metadata.UpdateGCP(Punti, path, pProgress);
 
-	SAR_Model ModProva(Prova_metadata);
+	SAR_Model *ModProva;
+	ModProva = new SAR_Slant_Model(Prova_metadata);
+
+	if(Prova_metadata.Projection == "SGF")
+	{
+		ModProva = new SAR_Ground_Model(Prova_metadata);
+	}
+	//else
+	//{
+		
+	//}
 
 	P_COORD Punto;
 	int N=Punti.size();
@@ -220,7 +232,7 @@ bool Test_Update_RADARSAT2::execute(PlugInArgList* pInArgList, PlugInArgList* pO
 			Lon = pList->mCoordinate.mX;
 			Lat = pList->mCoordinate.mY;
 			
-			Punto = ModProva.SAR_GroundToSlant(pList->mCoordinate.mX,pList->mCoordinate.mY,pList->mCoordinate.mZ); 
+			Punto = ModProva->SAR_GroundToImage(pList->mCoordinate.mX,pList->mCoordinate.mY,pList->mCoordinate.mZ); 
 			pList->mRmsError.mX = pList->mPixel.mX -Punto.I;
 			pList->mRmsError.mY = pList->mPixel.mY -Punto.J;
 			accX(pList->mRmsError.mX);
