@@ -37,20 +37,31 @@ STATEVECTOR LagrangeInterpolation (double ,std::vector<STATEVECTOR>, std::vector
 class SAR_Model
 {
 public:
+	SAR_Model();
 	SAR_Model(SAR_Metadata &);
 	SAR_Model(SAR_Metadata &, int);
 	~SAR_Model(void);
 
-	P_COORD SAR_GroundToSlant(double Lon,double Lat,double H);
+	//P_COORD SAR_GroundToSlant(double Lon,double Lat,double H);
+
+	//P_COORD SAR_GroundToGroundRange(double Lon,double Lat,double H);
+
+	virtual P_COORD SAR_GroundToImage(double Lon, double Lat, double H);
 
 	double Time;
+	int PrecisionIndex;
+
 	SAR_Metadata Metadata;
 
 	//Orbit Estimated Coefficients//
 	std::vector<STATEVECTOR> StateVectorsRows;
 	std::vector<OrbitCoefficients> OrbitCoeff;
 
-	int PrecisionIndex;
+	//GROUND RANGE VECTORS
+	//std::vector<double> SlantRangePixelDistance;
+	//std::vector<double> PixelColumnSpacing;
+
+	
 };
 
 #endif

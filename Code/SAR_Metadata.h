@@ -26,8 +26,9 @@ struct P_COORD
 	double Height;
 }; 
 
-struct STATEVECTOR
+class STATEVECTOR  
 {
+public:
 	double X;
 	double Y;
 	double Z;
@@ -36,7 +37,17 @@ struct STATEVECTOR
 	double VelocityZ;
 	double DOY; 
 
+	~STATEVECTOR()
+	{	
+	}
+
 }; 
+
+struct GR_Polynomial
+{
+	double S0,S1,S2,S3,S4,S5;
+	double G0;
+};
 
 double DATEtoDOY(std::string);
 
@@ -54,16 +65,20 @@ public:
 	std::string Orbit;
 	std::string SideLooking;
 	std::string ProductType;
+	std::string Date;
 
 	// RASTER DATA //
 	int     Height, Width;
 	double  ColumnSpacing;
 	double  RowSpacing;
 	double  RangeD0;
+	double  RangeD0_Free;
 	double  RangeDi;
 	double  PRF; //Pulse Repetition Frequency //
 	double  AzimutT0; // First pixel azimuth time //
 	double  AzimutTi; // 1/PRF //
+	double Min_IncidenceAngle;
+	double Max_IncidenceAngle;
 
 	// COORDINATE SCENE //
 	double SceneHeight;
@@ -72,6 +87,10 @@ public:
 	// STATE VECTORS INFORMATION //
 	int NumStateVectors;
 	std::vector<STATEVECTOR> StateVectors; 
+
+	//GROUND RANGE POLYNOMIAL
+
+	GR_Polynomial GroundRange;
 
 	virtual bool ReadFile(std::string) 
 	{ return true;}
