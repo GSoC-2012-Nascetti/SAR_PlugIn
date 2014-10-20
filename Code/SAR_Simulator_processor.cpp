@@ -200,7 +200,7 @@ bool SAR_Simulator_Processor::process(int type)
 		  NodeLat = OrthoGrid.Lat_Min+row*OrthoGrid.Lat_Step;
 		  NodeLon = OrthoGrid.Lon_Min+col*OrthoGrid.Lon_Step;
 
-		  P_COORD NodeImage = Model->SAR_GroundToSlant(NodeLon,NodeLat,FlatHeight);
+		  P_COORD NodeImage = Model->SAR_GroundToImage(NodeLon,NodeLat,FlatHeight);
 
 		  if ((NodeImage.I>1 && NodeImage.I< Model->Metadata.Width-1) && (NodeImage.J>1 && NodeImage.J< Model->Metadata.Height-1))
 		  {
@@ -411,7 +411,7 @@ bool SAR_Simulator_Processor::process(int type, RasterElement *pDSM, GRID DSMGri
     double NodeLat, NodeLon, H_IJ=0;
 	//int DSM_I, DSM_J;
 
-    for (unsigned int row = 0; row < N_Row; ++row)
+    for (unsigned int row = 0; row < N_Row-1; ++row)
     {
 	  if (pProgress != NULL)
 	  {
@@ -426,7 +426,7 @@ bool SAR_Simulator_Processor::process(int type, RasterElement *pDSM, GRID DSMGri
          return false;
       }
 
-      for (unsigned int col = 0; col < N_Col; ++col)
+      for (unsigned int col = 0; col < N_Col-1; ++col)
       {
 
 		  NodeLat = OrthoGrid.Lat_Min+row*OrthoGrid.Lat_Step;
@@ -449,7 +449,7 @@ bool SAR_Simulator_Processor::process(int type, RasterElement *pDSM, GRID DSMGri
 		  H_IJ = bilinear_Prova_height(pDSMAcc,DSM_I,DSM_J);
 		  }
 
-		  P_COORD NodeImage = Model->SAR_GroundToSlant(NodeLon,NodeLat,H_IJ+Geoid_Offset);
+		  P_COORD NodeImage = Model->SAR_GroundToImage(NodeLon,NodeLat,H_IJ+Geoid_Offset);
 
 		  if ((NodeImage.I/ML_Range>1 && NodeImage.I/ML_Range< Image_W-1) && (NodeImage.J/ML_Azimuth>1 && NodeImage.J/ML_Azimuth< Image_Hg-1))
 		  {
@@ -472,46 +472,46 @@ bool SAR_Simulator_Processor::process(int type, RasterElement *pDSM, GRID DSMGri
 
    Service<DesktopServices> pDesktop;
 
-   Service<ModelServices> pMod;
+   //Service<ModelServices> pMod;
 
-   GcpList* GcpL = static_cast<GcpList*>(pMod->createElement("corner coordinate","GcpList",pResultCube.get()));
+   // GcpList* GcpL = static_cast<GcpList*>(pMod->createElement("corner coordinate","GcpList",pResultCube.get()));
    
    // Update GCPs Information: to account for Opticks reading gcp lat&lon values the opposite way around, 
    // here it is necessary to switch the value to assign lat to gcp.mCoordinate.mX  and lon to gcp.mCoordinate.mY 
 
-   GcpPoint Punto;
+   //GcpPoint Punto;
 
-   Punto.mCoordinate.mX = OrthoGrid.Lat_Min;
-   Punto.mCoordinate.mY = OrthoGrid.Lon_Min;
-   Punto.mCoordinate.mZ = 0.0;
-   Punto.mPixel.mX = 0.0;
-   Punto.mPixel.mY = 0.0;
+   //Punto.mCoordinate.mX = OrthoGrid.Lat_Min;
+   //Punto.mCoordinate.mY = OrthoGrid.Lon_Min;
+   //Punto.mCoordinate.mZ = 0.0;
+   //Punto.mPixel.mX = 0.0;
+   //Punto.mPixel.mY = 0.0;
 
-   GcpL->addPoint(Punto);
+   //GcpL->addPoint(Punto);
 
-   Punto.mCoordinate.mX = OrthoGrid.Lat_Max;
-   Punto.mCoordinate.mY = OrthoGrid.Lon_Min;
-   Punto.mCoordinate.mZ = 0.0;
-   Punto.mPixel.mX = 0.0;
-   Punto.mPixel.mY = OrthoGrid.Y_Dim;
-   
-   GcpL->addPoint(Punto);
+   //Punto.mCoordinate.mX = OrthoGrid.Lat_Max;
+   //Punto.mCoordinate.mY = OrthoGrid.Lon_Min;
+   //Punto.mCoordinate.mZ = 0.0;
+   //Punto.mPixel.mX = 0.0;
+   //Punto.mPixel.mY = OrthoGrid.Y_Dim;
+   //
+   //GcpL->addPoint(Punto);
 
-   Punto.mCoordinate.mX = OrthoGrid.Lat_Min;
-   Punto.mCoordinate.mY = OrthoGrid.Lon_Max;
-   Punto.mCoordinate.mZ = 0.0;
-   Punto.mPixel.mX = OrthoGrid.X_Dim;
-   Punto.mPixel.mY = 0.0;
-   
-   GcpL->addPoint(Punto);
+   //Punto.mCoordinate.mX = OrthoGrid.Lat_Min;
+   //Punto.mCoordinate.mY = OrthoGrid.Lon_Max;
+   //Punto.mCoordinate.mZ = 0.0;
+   //Punto.mPixel.mX = OrthoGrid.X_Dim;
+   //Punto.mPixel.mY = 0.0;
+   //
+   //GcpL->addPoint(Punto);
 
-   Punto.mCoordinate.mX = OrthoGrid.Lat_Max;
-   Punto.mCoordinate.mY = OrthoGrid.Lon_Max;
-   Punto.mCoordinate.mZ = 0.0;
-   Punto.mPixel.mX = OrthoGrid.X_Dim;
-   Punto.mPixel.mY = OrthoGrid.Y_Dim;
-   
-   GcpL->addPoint(Punto); 
+   //Punto.mCoordinate.mX = OrthoGrid.Lat_Max;
+   //Punto.mCoordinate.mY = OrthoGrid.Lon_Max;
+   //Punto.mCoordinate.mZ = 0.0;
+   //Punto.mPixel.mX = OrthoGrid.X_Dim;
+   //Punto.mPixel.mY = OrthoGrid.Y_Dim;
+   //
+   //GcpL->addPoint(Punto); 
 
 
    // Win for MASK
@@ -524,7 +524,7 @@ bool SAR_Simulator_Processor::process(int type, RasterElement *pDSM, GRID DSMGri
 
    pView->createLayer(RASTER, pResultCube.get());
    
-   pView->createLayer(GCP_LAYER,GcpL,"GCP");
+   //pView->createLayer(GCP_LAYER,GcpL,"GCP");
 
    pView->setDataOrigin(LOWER_LEFT);
 

@@ -24,6 +24,8 @@
 #include "ProgressResource.h"
 #include "RADARSAT_Metadata.h"
 #include "RasterDataDescriptor.h"
+#include "SAR_Ground_Model.h"
+#include "SAR_Slant_Model.h"
 #include "StringUtilities.h"
 #include "UtilityServices.h"
 
@@ -299,8 +301,12 @@ void Simulation_GUI::StartOrtho()
 	Metadata->UpdateMetadata(oMetadata); 
 
 	SAR_Model *ModProva;
-		
-	ModProva = new SAR_Model(*Metadata,10);
+	ModProva = new SAR_Slant_Model(*Metadata, 10);
+
+	if(Metadata->Projection == "SGF")
+	{
+		ModProva = new SAR_Ground_Model(*Metadata,10);
+	}
 
 	SAR_Simulator_Processor ProcessOrtho(pCube, ModProva, OrthoGrid, Height->value());
 	
@@ -308,15 +314,15 @@ void Simulation_GUI::StartOrtho()
 
 	int indexR = mpInterpolationList->currentIndex();
 	
-	if (mpFlatten->isChecked() ==true) 
-	{
-		VERIFYNRV(ProcessOrtho.process(indexR));	
-	}
-	else 
-	{
+	//if (mpFlatten->isChecked() ==true) 
+	//{
+		//VERIFYNRV(ProcessOrtho.process(indexR));	
+	//}
+	//else 
+	//{
 		VERIFYNRV(RetrieveDSMGrid());
 		VERIFYNRV(ProcessOrtho.process(indexR, pDSM, DSMGrid, GeoidOffSet->value(),mpDSMInterpolationList->currentIndex()));
-	}
+	//}
 
 }
 
@@ -440,7 +446,16 @@ void Simulation_GUI::CheckModel()
      
 	Punti = Metadata->UpdateGCP(Punti, image_path);
 
-	SAR_Model ModProva(*Metadata,100);
+	//SAR_Model ModProva(*Metadata);
+
+	SAR_Model *ModProva;
+	//ModProva = new SAR_Ground_Model(Prova_metadata);
+	ModProva = new SAR_Slant_Model(*Metadata);
+
+	if(Metadata->Projection == "SGF")
+	{
+		ModProva = new SAR_Ground_Model(*Metadata);
+	}
 
 	P_COORD Punto;
 	int N=Punti.size();
@@ -457,7 +472,7 @@ void Simulation_GUI::CheckModel()
 			Lon = pList->mCoordinate.mX;
 			Lat = pList->mCoordinate.mY;
 			
-			Punto = ModProva.SAR_GroundToSlant(pList->mCoordinate.mX,pList->mCoordinate.mY,pList->mCoordinate.mZ); 
+			Punto = ModProva->SAR_GroundToImage(pList->mCoordinate.mX,pList->mCoordinate.mY,pList->mCoordinate.mZ); 
 			pList->mRmsError.mX = pList->mPixel.mX -Punto.I;
 			pList->mRmsError.mY = pList->mPixel.mY -Punto.J;
 			accX(pList->mRmsError.mX);
