@@ -87,6 +87,13 @@
     <ClCompile Include="Code\SAR_Simulator_processor.cpp">
       <Filter>Simulator</Filter>
     </ClCompile>
+    <ClCompile Include="Code\SAR_Ground_Model.cpp">
+      <Filter>SAR Orientation Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\SAR_Slant_Model.cpp">
+      <Filter>SAR Orientation Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ImageGeodesy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\xmlreaderSAR.h">
@@ -123,6 +130,13 @@
     <ClInclude Include="Code\importTP.h">
       <Filter>Tools</Filter>
     </ClInclude>
+    <ClInclude Include="Code\SAR_Ground_Model.h">
+      <Filter>SAR Orientation Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\SAR_Slant_Model.h">
+      <Filter>SAR Orientation Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ImageGeodesy.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="SAR Orientation Model">

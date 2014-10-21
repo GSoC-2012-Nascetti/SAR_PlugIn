@@ -74,9 +74,11 @@
     <Import Project="..\..\..\CompileSettings\Macros.props" />
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Release-64bit.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\pthreads.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\..\..\..\..\..\..\Users\Administrator\Documents\Visual Studio 2010\Projects\Default-OpenCV\Default-OpenCV\Opencv-Release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -146,10 +148,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Code\exportGCP.cpp" />
+    <ClCompile Include="Code\ImageGeodesy.cpp" />
     <ClCompile Include="Code\importTP.cpp" />
     <ClCompile Include="Code\ModuleManager.cpp" />
     <ClCompile Include="Code\Orthorectification.cpp" />
     <ClCompile Include="Code\Ortho_GUI.cpp" />
+    <ClCompile Include="Code\SAR_Ground_Model.cpp" />
+    <ClCompile Include="Code\SAR_Slant_Model.cpp" />
     <ClCompile Include="Code\Simulation_GUI.cpp" />
     <ClCompile Include="Code\SAR_Simulator_processor.cpp" />
     <ClCompile Include="Code\Ortho_RADARSAT.cpp" />
@@ -178,6 +183,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\exportGCP.h" />
+    <ClInclude Include="Code\ImageGeodesy.h" />
     <ClInclude Include="Code\importTP.h" />
     <ClInclude Include="Code\Orthorectification.h" />
     <CustomBuild Include="Code\Ortho_GUI.h">
@@ -221,8 +227,10 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
+    <ClInclude Include="Code\SAR_Ground_Model.h" />
     <ClInclude Include="Code\SAR_Metadata.h" />
     <ClInclude Include="Code\SAR_Model.h" />
+    <ClInclude Include="Code\SAR_Slant_Model.h" />
     <ClInclude Include="Code\Stereo_SAR_Model.h" />
     <ClInclude Include="Code\TerraSAR_Metadata.h" />
     <CustomBuild Include="Code\StereoMeasurement.h">
