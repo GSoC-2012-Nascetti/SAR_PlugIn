@@ -191,5 +191,6 @@ SAR_Model::~SAR_Model(void)
 P_COORD SAR_Model::SAR_GroundToImage(double Lon, double Lat, double H)
 {
 	P_COORD Result;
+	Result.Height  = 0.0; //MMM 
 	return Result;
 }

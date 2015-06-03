@@ -143,9 +143,6 @@ P_COORD SAR_Ground_Model::SAR_GroundToImage(double Lon, double Lat, double H)
 		min_cs = max_cs;
 		max_cs = app;
 	}
-
-	//file_out<<"min "<<min_cs<<" "<<"max "<<max_cs<<endl;
-
 	
 	if (Metadata.SatelliteName == "RADARSAT-2")
 	{
@@ -161,7 +158,7 @@ P_COORD SAR_Ground_Model::SAR_GroundToImage(double Lon, double Lat, double H)
 		double min = prova[0];
 		int min_idx = 0; 
 
-		for(int i = 1; i< prova.size();i++)
+		for(unsigned int i = 1; i< prova.size();i++)
 		{
 			prova[i] = fabs(SlantRangePixelDistance[i+min_index]-(Pos_Module-Metadata.RangeD0));
 			if (prova[i]<min)
@@ -171,16 +168,12 @@ P_COORD SAR_Ground_Model::SAR_GroundToImage(double Lon, double Lat, double H)
 			} 
 		}
 
-
 		if (Metadata.Orbit == "Ascending" && Metadata.SideLooking =="Right") 
 		{
-			//Point.I = (Pos_Module-Metadata.RangeD0)/Metadata.RangeDi; 
-
 			Point.I = min_idx+min_index;
 
 			Point.J = (Metadata.Height-1)- ((StateVectorsRows[Index[1]].DOY-Metadata.AzimutT0)/Metadata.AzimutTi);
 		}
-
 
 		if (Metadata.Orbit == "Descending" && Metadata.SideLooking =="Right")
 		{

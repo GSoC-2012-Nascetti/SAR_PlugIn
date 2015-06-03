@@ -42,10 +42,6 @@ public:
 	SAR_Model(SAR_Metadata &, int);
 	~SAR_Model(void);
 
-	//P_COORD SAR_GroundToSlant(double Lon,double Lat,double H);
-
-	//P_COORD SAR_GroundToGroundRange(double Lon,double Lat,double H);
-
 	virtual P_COORD SAR_GroundToImage(double Lon, double Lat, double H);
 
 	double Time;
@@ -56,11 +52,6 @@ public:
 	//Orbit Estimated Coefficients//
 	std::vector<STATEVECTOR> StateVectorsRows;
 	std::vector<OrbitCoefficients> OrbitCoeff;
-
-	//GROUND RANGE VECTORS
-	//std::vector<double> SlantRangePixelDistance;
-	//std::vector<double> PixelColumnSpacing;
-
 	
 };
 

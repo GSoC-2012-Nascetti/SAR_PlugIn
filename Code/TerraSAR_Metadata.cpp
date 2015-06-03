@@ -18,7 +18,18 @@
 
 #include "xmlreaderSAR.h" 
 
+using namespace std;
 XERCES_CPP_NAMESPACE_USE
+
+
+
+template <typename T>
+  string NumberToString ( T Number )
+  {
+     ostringstream ss;
+     ss << Number;
+     return ss.str();
+  }
 
 TerraSAR_Metadata::TerraSAR_Metadata(void)
 {
@@ -404,6 +415,8 @@ std::list<GcpPoint> TerraSAR_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, 
 {
 	ProgressResource pProgress("ProgressBar");
 
+	
+
 	int N=0;
 	N = PuntiGCPs.size();
 	size_t pos;
@@ -412,9 +425,9 @@ std::list<GcpPoint> TerraSAR_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, 
 	path2 = path.substr(0,pos);
 	path2 += "/ANNOTATION/GEOREF.xml";
 
-	XmlReaderSAR xml(Service<MessageLogMgr>()->getLog(), false);
+	XmlReaderSAR *xml = new XmlReaderSAR(Service<MessageLogMgr>()->getLog(), false);
 	
-	if (path2.empty() || xml.parse(path2) == NULL)
+	if (path2.empty() || xml->parse(path2) == NULL)
 	{
       return PuntiGCPs;
 	}
@@ -422,29 +435,149 @@ std::list<GcpPoint> TerraSAR_Metadata::UpdateGCP(std::list<GcpPoint> PuntiGCPs, 
 	list<GcpPoint>::iterator pList;	
 
 	std::string current;
-	XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* pResult;
+	
 
 	int n=1;
 	
-	for (pList = PuntiGCPs.begin(); pList != PuntiGCPs.end(); pList++)
-	{
-		std::stringstream num;
-		num<<n;
-		current = "xs:double(//geolocationGrid/gridPoint["+num.str()+"]/lon/text())";
-		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
-		pList->mCoordinate.mX = static_cast<double>(pResult->getNumberValue());	
-		current = "xs:double(//geolocationGrid/gridPoint["+num.str()+"]/lat/text())";
-		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+	pProgress->updateProgress("Update GCPs Information",50, NORMAL);
+
+	//std::stringstream num;
+
+	//for (pList = PuntiGCPs.begin(); pList != PuntiGCPs.end(); pList++)
+	//{
+		//string num = std.string n;
+
+		//XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* pResult;
+
+		//current = "xs:double(//geolocationGrid/gridPoint["+NumberToString(n)+"]/lon/text())";
+		//pResult = xml->query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE, true);
+		//pList->mCoordinate.mX = static_cast<double>(xml->query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE)->getNumberValue());	
+
+		/*
+		current = "xs:double(//geolocationGrid/gridPoint["+NumberToString(n)+"]/lat/text())";
+		pResult = xml->query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE, true);
 		pList->mCoordinate.mY = static_cast<double>(pResult->getNumberValue());	
 
-		current = "xs:double(//geolocationGrid/gridPoint["+num.str()+"]/height/text())";
-		pResult = xml.query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE);
+		current = "xs:double(//geolocationGrid/gridPoint["+NumberToString(n)+"]/height/text())";
+		pResult = xml->query(current, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE, true);
 		pList->mCoordinate.mZ = static_cast<double>(pResult->getNumberValue());	
+		
 
-		n++;
+		*/ 
+
+		//pResult->~DOMXPathResult();
+
+		//delete pResult;
+
+
+
+	
+	// INIZIO PROVA SENZA CLASSE
+	
+   std::string mXmlSchemaLocation;
+   DOMDocument* mpDoc(NULL);
+   
+   
+   DOMImplementationLS* mpImpl = DOMImplementationRegistry::getDOMImplementation(X("XPath2 3.0 LS"));
+   ENSURE(mpImpl != NULL);
+
+   DOMLSParser* mpParser = mpImpl->createLSParser(DOMImplementationLS::MODE_SYNCHRONOUS, 0);
+   ENSURE(mpParser != NULL);
+
+   DOMConfiguration* pConfig = mpParser->getDomConfig();   
+   ENSURE(pConfig != NULL);
+
+   pConfig->setParameter(XMLUni::fgDOMNamespaces, true);
+   pConfig->setParameter(XMLUni::fgDOMValidateIfSchema, true);
+   pConfig->setParameter(XMLUni::fgXercesUserAdoptsDOMDocument, true);
+   pConfig->setParameter(XMLUni::fgXercesSchema, false);
+   pConfig->setParameter(XMLUni::fgXercesSchemaFullChecking, false);
+
+   const void* pOldError = pConfig->getParameter(XMLUni::fgDOMErrorHandler);
+
+      string uri = XmlBase::PathToURL(path2);
+
+      if (!mXmlSchemaLocation.empty())
+      {
+         string esl("https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd ");
+         for (unsigned int version = XmlBase::VERSION; version > 0; version--)
+         {
+            stringstream fname;
+            fname << mXmlSchemaLocation << "opticks-" << version << ".xsd";
+            FILE* pTmp = fopen(fname.str().c_str(), "r");
+            if (pTmp != NULL)
+            {
+               esl += XmlBase::PathToURL(fname.str()) + " ";
+               fclose(pTmp);
+               break;
+            }
+         }
+         pConfig->setParameter(XMLUni::fgXercesSchemaExternalSchemaLocation, const_cast<XMLCh*>(X(esl.c_str())));
+         pConfig->setParameter(XMLUni::fgXercesSchema, true);
+         pConfig->setParameter(XMLUni::fgXercesSchemaFullChecking, true);
+         pConfig->setParameter(XMLUni::fgXercesValidationErrorAsFatal, true);
+      }
+
+      //pConfig->setParameter(XMLUni::fgDOMErrorHandler, &errors);
+      mpDoc = mpParser->parseURI(uri.c_str());
+   
+
+   pConfig->setParameter(XMLUni::fgDOMErrorHandler, pOldError);
+ 
+   DOMXPathNSResolver* pResolver =
+      const_cast<DOMXPathNSResolver*>(mpDoc->createNSResolver(mpDoc->getDocumentElement()));
+   
+   //pResolver->addNamespaceBinding(X("opticks"), X(sNamespaceId));
+   pResolver->addNamespaceBinding(X("xml"),     X("http://www.w3.org/XML/1998/namespace"));
+   pResolver->addNamespaceBinding(X("xs"),      X("http://www.w3.org/2001/XMLSchema"));
+   pResolver->addNamespaceBinding(X("xsi"),     X("http://www.w3.org/2001/XMLSchema-instance"));
+   pResolver->addNamespaceBinding(X("fn"),      X("http://www.w3.org/2005/xpath-functions"));
+   pResolver->addNamespaceBinding(X("err"),     X("http://www.w3.org/2005/xqt-errors"));
+   pResolver->addNamespaceBinding(X("local"),   X("http://www.w3.org/2005/xquery-local-functions"));
+   //pResolver->addNamespaceBinding(X(""),        X("http://www.rsi.ca/rs2/prod/xml/schemas")); 
+   // RADARSAT-2 default namespace
+   
+	current = "//geolocationGrid/gridPoint/lon/text()";
+
+    DOMXPathExpression* pExpr = mpDoc->createExpression(X(current.c_str()), pResolver);
+
+	DOMXPathResult* mpResult(NULL);
+	
+	mpResult = pExpr->evaluate(mpDoc,  DOMXPathResult::ORDERED_NODE_ITERATOR_TYPE , 0);  // PROBLEMA QUI!!!! CAZZO
+
+	//DOMNodeIterator * iterator =  mpDoc->createNodeIterator(mpResult->get, DOMNodeFilter::SHOW_TEXT, NULL, true);
+
+	
+	for (pList = PuntiGCPs.begin(); pList != PuntiGCPs.end(); pList++)
+	{
+		
+		DOMNode* pippo(NULL);
+		
+		pippo = mpResult->getNodeValue();
+			
+		mpResult->iterateNext();
+		
+		
+		
+		
+		
+
+
+   
+	//	pList->mCoordinate.mX = static_cast<double>();	
+
+		   //FINE PROVA 
+
+ 		n++;
 		pProgress->updateProgress("Update GCPs Information",int(100*n/N), NORMAL);
 
 	}
+
+	pProgress->updateProgress("Update GCPs Information",100, NORMAL);
+
+	delete xml;
+
+
 
 	return PuntiGCPs;
 }

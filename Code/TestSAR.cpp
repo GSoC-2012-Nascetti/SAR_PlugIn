@@ -42,6 +42,13 @@
 #include "xmlreaderSAR.h" 
 #include "xmlwriter.h"
 
+
+// Prova mac adress
+#include <Windows.h>
+#include <assert.h>
+#include <IPHlpApi.h>
+
+
 XERCES_CPP_NAMESPACE_USE
 
 REGISTER_PLUGIN_BASIC(OpticksSAR, TestSAR);
@@ -86,6 +93,12 @@ bool TestSAR::getOutputSpecification(PlugInArgList*& pOutArgList)
 bool TestSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
  
+
+
+
+
+
+
   StepResource pStep("Tutorial CEO", "app", "0FD3C564-041D-4f8f-BBF8-96A7A165AB61");
 
   if (pInArgList == NULL || pOutArgList == NULL)

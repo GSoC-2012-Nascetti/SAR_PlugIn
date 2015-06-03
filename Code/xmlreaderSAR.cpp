@@ -11,6 +11,7 @@
 #include "MessageLogResource.h"
 #include "StringUtilities.h"
 #include "UtilityServices.h"
+#include "xmlbase.h"
 #include "xmlreader.h"
 #include "xmlreaderSAR.h"
 
@@ -250,6 +251,8 @@ XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* XmlReaderSAR::queryNamespace(cons
    pResolver->addNamespaceBinding(X("err"),     X("http://www.w3.org/2005/xqt-errors"));
    pResolver->addNamespaceBinding(X("local"),   X("http://www.w3.org/2005/xquery-local-functions"));
    pResolver->addNamespaceBinding(X(""),        X( DefaultNamespace.c_str() ));         // RADARSAT-2 default namespace
+   
+   
    const DOMXPathExpression* pExpr = mpDoc->createExpression(X(expression.c_str()), pResolver);
    if (pExpr == NULL)
    {
@@ -261,6 +264,9 @@ XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* XmlReaderSAR::queryNamespace(cons
    {
       mpResult = pResult;
    }
+
+   //XMLPlatformUtils::Terminate();
+
    return pResult;
 }
 

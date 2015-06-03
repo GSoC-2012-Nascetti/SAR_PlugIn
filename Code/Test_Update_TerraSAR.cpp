@@ -147,11 +147,31 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 
 	Prova_metadata.UpdateMetadata(Metadata); 
 
+	//SAR_Model ModProva(Prova_metadata,1000);
+
+	SAR_Model *ModProva;
+	//ModProva = new SAR_Ground_Model(Prova_metadata);
+	
+	ModProva = new SAR_Slant_Model(Prova_metadata);
+
+	if(Prova_metadata.Projection == "SGF")
+	{
+		ModProva = new SAR_Ground_Model(Prova_metadata);
+	}
+	//else
+	//{
+	//	ModProva = new SAR_Slant_Model(Prova_metadata);
+	//}
+	
+	
 	// WIDGET SELECT & RETRIEVE GCPs INFORMATION  //
 	GcpList * GCPs = NULL;
 
     Service<ModelServices> pModel;
 	std::vector<DataElement*> pGcpLists = pModel->getElements(pCube, TypeConverter::toString<GcpList>());
+
+
+	std::list<GcpPoint> Punti;
 
     if (!pGcpLists.empty())
 	{
@@ -196,29 +216,15 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
              }
 			 return false;
 		 }
-	} // End if GcpList
-   
-	
-	// UPDATE GCPs HEIGHT INFORMATION AND SWITCH Lat&Lon COORDINATE FOR CORRECT VISUALIZAZION IN THE GCPs EDITOR
 
-    std::list<GcpPoint> Punti = GCPs->getSelectedPoints();
+
+		// UPDATE GCPs HEIGHT INFORMATION AND SWITCH Lat&Lon COORDINATE FOR CORRECT VISUALIZAZION IN THE GCPs EDITOR
+
+		Punti = GCPs->getSelectedPoints();
      
-	Punti = Prova_metadata.UpdateGCP(Punti, path, pProgress);
+		Punti = Prova_metadata.UpdateGCP(Punti, path, pProgress);
 
-	//SAR_Model ModProva(Prova_metadata,1000);
 
-	SAR_Model *ModProva;
-	//ModProva = new SAR_Ground_Model(Prova_metadata);
-	ModProva = new SAR_Slant_Model(Prova_metadata);
-
-	if(Prova_metadata.Projection == "SGF")
-	{
-		ModProva = new SAR_Ground_Model(Prova_metadata);
-	}
-	//else
-	//{
-	//	ModProva = new SAR_Slant_Model(Prova_metadata);
-	//}
 
 	P_COORD Punto;
 	int N=Punti.size();
@@ -270,15 +276,16 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 		indexP++;
 	}
 
-	 double meanX = mean(accX);
-	 double meanY = mean(accY);
+	double meanX = mean(accX);
+	double meanY = mean(accY);
 
-	 double varX = variance(accX);
-	 double varY = variance(accY);
+	double varX = variance(accX);
+	double varY = variance(accY);
 	
-     GCPs->clearPoints();
-     GCPs->addPoints(Punti);
-	
+    GCPs->clearPoints();
+    GCPs->addPoints(Punti);
+
+
 	if (pProgress != NULL)
 	{
 		std::string msg = "Number of Rows : " + StringUtilities::toDisplayString(pDesc->getRowCount()) + "\n"
@@ -293,6 +300,15 @@ bool Test_Update_TerraSAR::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 				  						                      
 		pProgress->updateProgress(msg, 100, NORMAL);
 	}
+
+	} // End if GcpList
+	else
+	{
+		Punti.resize(Prova_metadata.Grid_N);
+		Punti = Prova_metadata.UpdateGCP(Punti, path);
+
+	}
+
 
 	pStep->finalize(); 
 

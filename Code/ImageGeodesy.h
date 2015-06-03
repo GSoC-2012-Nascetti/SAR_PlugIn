@@ -19,6 +19,7 @@ class ImageGeodesy : public ExecutableShell, QDialog
 
 public:
    ImageGeodesy(void);
+
    virtual ~ImageGeodesy(void);
 
    virtual bool getInputSpecification(PlugInArgList*& pInArgList);

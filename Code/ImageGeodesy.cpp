@@ -41,7 +41,7 @@
 #include "xmlreader.h" 
 #include "xmlreaderSAR.h" 
 #include "xmlwriter.h"
-#include "SAR_Model.h"
+#include "SAR_Slant_Model.h"
 #include <iostream>
 #include <fstream>
 
@@ -105,12 +105,12 @@ bool ImageGeodesy::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
 		   
 	TerraSAR_Metadata Prova_metadata;
 	TerraSAR_Metadata Slave_metadata;
-	SAR_Model *Model;
+	SAR_Slant_Model *Model;
 
     string path_stereo = "E:/Database_TerraSAR-X/Berlino/dims_op_oc_dfd2_339140663_1/TSX-1.SAR.L1B/TSX1_SAR__SSC______HS_S_SRA_20080814T170102_20080814T170103/TSX1_SAR__SSC______HS_S_SRA_20080814T170102_20080814T170103.xml";
 
 	Slave_metadata.ReadFile(path_stereo);
-	SAR_Model Slave_Model(Slave_metadata,100); 
+	SAR_Slant_Model Slave_Model(Slave_metadata,100); 
 
 	//APERTURA E LETTURA DEL FILE
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Select input image coordinate file"));
@@ -126,6 +126,8 @@ bool ImageGeodesy::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
 	path.reserve(500);
 
 	if(!input_file.is_open()) return false;
+
+	output_file << "nome input = " << fileName.toStdString() << endl;
 
 	double I=0, J=0, cc_max=0;
 	double X=0,Y=0,Z=0;
@@ -149,7 +151,7 @@ bool ImageGeodesy::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
 	while(input_file >> I >> J >> cc_max >> path)
 	{
 		Prova_metadata.ReadFile(path);
-		Model = new SAR_Model(Prova_metadata,100);
+		Model = new SAR_Slant_Model(Prova_metadata,100);
 
 		Stereo_SAR_Model sModel (Model,&Slave_Model);
 
@@ -178,6 +180,7 @@ bool ImageGeodesy::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
 	} 
 
 	//Prova_metadata.UpdateMetadata(Metadata); 
+	
      
 	//   ************************************************************************************ //
 
